@@ -62,23 +62,50 @@ if user_role == "Khách hàng":
 
 else:
     # PHẦN DÀNH CHO BẢO VỆ
+   # --- PHẦN DÀNH CHO BẢO VỆ (Cập nhật mới) ---
+else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
     password = st.text_input("Nhập mật khẩu quản lý", type="password")
     
-    # Mật khẩu em tự đặt (ví dụ: 123456)
-    if password == "123456":
+    if password == "123456": # Nhớ đổi mật khẩu của em ở đây
         st.success("Đã đăng nhập quyền Bảo vệ")
         
-        st.subheader("📊 Danh sách khách đang ở trong")
         df = pd.read_excel(FILE_NAME)
-        # Chỉ hiện những người chưa ra về
+        # Chuyển cột GioVao sang định dạng ngày tháng để lọc nếu cần, ở đây mình lọc đơn giản
+        
+        # 1. DANH SÁCH KHÁCH ĐANG Ở TRONG (Chưa có giờ ra)
+        st.subheader("🔴 Khách đang ở trong cơ quan")
         khach_trong = df[df['GioRa'].isna() | (df['GioRa'] == "")]
-        st.table(khach_trong)
+        if not khach_trong.empty:
+            st.dataframe(khach_trong, use_container_width=True)
+        else:
+            st.info("Hiện không có khách nào ở trong.")
+
+        st.divider()
+
+        # 2. DANH SÁCH KHÁCH ĐÃ RA VỀ (Đã có giờ ra)
+        st.subheader("🟢 Khách đã ra về trong ngày")
+        khach_ve = df[df['GioRa'].notna() & (df['GioRa'] != "")]
+        if not khach_ve.empty:
+            # Đảo ngược danh sách để người mới về hiện lên đầu
+            st.dataframe(khach_ve.iloc[::-1], use_container_width=True)
+        else:
+            st.info("Chưa có khách nào báo ra về.")
         
         st.divider()
-        st.subheader("💾 Tải dữ liệu máy chủ")
-        with open(FILE_NAME, "rb") as f:
-            st.download_button("📥 Tải File Excel Full", f, file_name=FILE_NAME)
+        st.subheader("💾 Quản lý dữ liệu")
+        col1, col2 = st.columns(2)
+        with col1:
+            with open(FILE_NAME, "rb") as f:
+                st.download_button("📥 Tải File Excel Full", f, file_name=FILE_NAME)
+        with col2:
+            if st.button("🗑️ Xóa toàn bộ dữ liệu (Reset)"):
+                # Tạo file mới trắng tinh
+                df_new = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "GioVao", "GioRa"])
+                df_new.to_excel(FILE_NAME, index=False)
+                st.warning("Đã xóa dữ liệu. Hãy F5 lại trang.")
+    
     elif password != "":
-        st.error("Sai mật khẩu rồi em ơi!")
+        st.error("Sai mật khẩu rồi em!")
+
 
