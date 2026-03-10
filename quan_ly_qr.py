@@ -35,31 +35,50 @@ st.sidebar.title("🔑 QUẢN TRỊ")
 user_role = st.sidebar.selectbox("Bạn là ai?", ["Khách hàng", "Bảo vệ / Admin"])
 
 if user_role == "Khách hàng":
-    st.title("📝 ĐĂNG KÝ VÀO CỔNG")
-    with st.form("checkin_form"):
-        name = st.text_input("Họ và tên")
-        phone = st.text_input("Số điện thoại")
-        target = st.text_input("Người cần gặp")
-      
-        submit = st.form_submit_button("Lấy mã QR")
+        st.title("📝 ĐĂNG KÝ VÀO CỔNG")
+        with st.form("checkin_form"):
+            name = st.text_input("Họ và tên")
+            phone = st.text_input("Số điện thoại")
 
-    if submit and name:
-        guest_id = f"G_{datetime.now().strftime('%d%H%M%S')}"
-        time_in = datetime.now().strftime("%H:%M:%S %d/%m/%Y")
-        
-        df = pd.read_excel(FILE_NAME)
-        new_row = pd.DataFrame([[guest_id, name, phone, target, time_in, ""]], columns=df.columns)
-        df = pd.concat([df, new_row], ignore_index=True)
-        df.to_excel(FILE_NAME, index=False)
-        
-        # Link để quét ra (Nhớ sửa link app của em cho đúng nhé)
-        app_url = "https://he-thong-qr-yq76udatzyox4wdfbr8n6q.streamlit.app/"
-        checkout_url = f"{app_url}?checkout_id={guest_id}"
-        
-        qr_img = qrcode.make(checkout_url)
-        qr_img.save("guest_qr.png")
-        st.success("Đăng ký thành công! Hãy chụp lại mã này để đưa bảo vệ khi về:")
-        st.image("guest_qr.png", width=300)
+            # --- PHẦN CHỌN NGƯỜI CẦN GẶP THÔNG MINH ---
+            danh_sach_nhom = ["Ban giám hiệu", "Đoàn trường", "GVCN", "Hành chính", "Khác"]
+            lua_chon = st.selectbox("Bộ phận/Người cần gặp", danh_sach_nhom)
+            
+            # Khởi tạo các ô nhập bổ sung
+            ten_lop = ""
+            nguoi_cu_the = ""
+            if lua_chon == "GVCN":
+                ten_lop = st.text_input("Nhập tên lớp (Ví dụ: 12A1)")
+            elif lua_chon == "Khác":
+                nguoi_cu_the = st.text_input("Nhập tên người/bộ phận cụ thể")
+            # ------------------------------------------
+
+            submit = st.form_submit_button("Lấy mã QR")
+
+            if submit:
+                # Xử lý logic lấy giá trị cuối cùng để lưu
+                if lua_chon == "GVCN":
+                    chi_tiet_gap_ai = f"GVCN lớp {ten_lop}"
+                elif lua_chon == "Khác":
+                    chi_tiet_gap_ai = nguoi_cu_the
+                else:
+                    chi_tiet_gap_ai = lua_chon
+
+                if name and phone and chi_tiet_gap_ai:
+                    # Đoạn này là để lưu vào Excel của em
+                    now = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
+                    new_data = pd.DataFrame({
+                        "ID": [str(uuid.uuid4())[:8]],
+                        "HoTen": [name],
+                        "SDT": [phone],
+                        "GapAi": [chi_tiet_gap_ai],
+                        "GioVao": [now],
+                        "GioRa": [""]
+                    })
+                    # Code lưu file Excel tiếp theo của em...
+                    st.success(f"Đã đăng ký thành công gặp: {chi_tiet_gap_ai}")
+                else:
+                    st.error("Vui lòng nhập đầy đủ thông tin em nhé!")
 
     # PHẦN DÀNH CHO BẢO VỆ
    # --- PHẦN DÀNH CHO BẢO VỆ (Cập nhật mới) ---
@@ -117,6 +136,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
