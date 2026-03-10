@@ -145,6 +145,15 @@ if user_role == "Khách hàng":
 
                 st.divider()
                 st.image(byte_im, caption=f"Mã định danh: {new_id}", use_container_width=True)
+                # --- THÊM NÚT TẢI MÃ QR VỀ MÁY ---
+                st.download_button(
+                    label="📥 Tải mã QR về máy",
+                    data=byte_im,
+                    file_name=f"Ma_QR_{new_id}.png",
+                    mime="image/png",
+                    use_container_width=True
+                )
+                # ---------------------------------
                 st.info("💡 Quý khách vui lòng lưu lại mã QR này để check out nhé!")
 
     # PHẦN DÀNH CHO BẢO VỆ
@@ -206,6 +215,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
