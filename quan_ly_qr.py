@@ -39,48 +39,8 @@ if user_role == "Khách hàng":
     with st.form("checkin_form"):
         name = st.text_input("Họ và tên")
         phone = st.text_input("Số điện thoại")
-        
-        # --- PHẦN CHỌN NGƯỜI CẦN GẶP (Cập nhật mới) ---
-        danh_sach_nhom = ["Ban giám hiệu", "Đoàn trường", "GVCN", "Hành chính", "Khác"]
-        lua_chon = st.selectbox("Bộ phận/Người cần gặp", danh_sach_nhom)
-        
-        # Biến để lưu thông tin chi tiết vào Excel
-        chi_tiet_gap_ai = ""
-        
-        if lua_chon == "GVCN":
-            ten_lop = st.text_input("Nhập tên lớp (Ví dụ: 12A1)")
-            chi_tiet_gap_ai = f"GVCN lớp {ten_lop}"
-        elif lua_chon == "Khác":
-            nguoi_cu_the = st.text_input("Nhập tên người/bộ phận cụ thể")
-            chi_tiet_gap_ai = nguoi_cu_the
-        else:
-            chi_tiet_gap_ai = lua_chon
-        # ----------------------------------------------
-
-        if st.button("Gửi đăng ký"):
-            # Kiểm tra xem đã nhập đủ thông tin chưa
-            hop_le = True
-            if not HoTen or not SDT:
-                hop_le = False
-                st.error("Vui lòng nhập Họ tên và Số điện thoại!")
-            elif lua_chon == "GVCN" and not ten_lop:
-                hop_le = False
-                st.error("Vui lòng nhập tên lớp của GVCN!")
-            elif lua_chon == "Khác" and not nguoi_cu_the:
-                hop_le = False
-                st.error("Vui lòng nhập tên người cần gặp cụ thể!")
-
-            if hop_le:
-                now = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
-                new_data = pd.DataFrame({
-                    "ID": [str(uuid.uuid4())[:8]],
-                    "HoTen": [HoTen],
-                    "SDT": [SDT],
-                    "GapAi": [chi_tiet_gap_ai], # Lưu thông tin chi tiết vào đây
-                    "GioVao": [now],
-                    "GioRa": [""]
-                })
-                # ... (Đoạn code lưu vào Excel tiếp theo của em) ...
+        target = st.text_input("Người cần gặp")
+      
         submit = st.form_submit_button("Lấy mã QR")
 
     if submit and name:
@@ -157,6 +117,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
