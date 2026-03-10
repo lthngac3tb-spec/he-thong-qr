@@ -97,29 +97,29 @@ else:
     if password == "123456": 
         st.success("Đã đăng nhập quyền Bảo vệ")
         # --- ĐOẠN CODE TẠO VÀ HIỂN THỊ MÃ QR CHÍNH XÁC ---
-                # Ghép link app của em với ID của khách
-                link_goc = "https://he-thong-qr-yq76udatzyox4wdfbr8n6q.streamlit.app/"
-                link_bao_ra = f"{link_goc}?id={new_id}" 
+        # Ghép link app của em với ID của khách
+        link_goc = "https://he-thong-qr-yq76udatzyox4wdfbr8n6q.streamlit.app/"
+        link_bao_ra = f"{link_goc}?id={new_id}" 
                 
                 # Tạo hình ảnh QR
-                qr = qrcode.QRCode(version=1, box_size=10, border=4)
-                qr.add_data(link_bao_ra)
-                qr.make(fit=True)
-                img = qr.make_image(fill_color="black", back_color="white")
+        qr = qrcode.QRCode(version=1, box_size=10, border=4)
+        qr.add_data(link_bao_ra)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
 
                 # Chuyển đổi để hiển thị trên Streamlit
-                from io import BytesIO
-                buf = BytesIO()
-                img.save(buf, format="PNG")
-                byte_im = buf.getvalue()
+        from io import BytesIO
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        byte_im = buf.getvalue()
 
-                st.divider()
-                st.markdown("<h3 style='text-align: center; color: green;'>✅ ĐĂNG KÝ THÀNH CÔNG!</h3>", unsafe_allow_html=True)
+        st.divider()
+        st.markdown("<h3 style='text-align: center; color: green;'>✅ ĐĂNG KÝ THÀNH CÔNG!</h3>", unsafe_allow_html=True)
                 
                 # Hiển thị ảnh QR ra màn hình
-                st.image(byte_im, caption=f"Mã định danh của em: {new_id}", use_container_width=True)
+        st.image(byte_im, caption=f"Mã định danh của em: {new_id}", use_container_width=True)
                 
-                st.info("💡 **Lưu ý:** Em hãy chụp màn hình mã QR này. Khi ra về, hãy đưa cho Bảo vệ quét hoặc tự quét để xác nhận 'Giờ Ra' nhé!")
+        st.info("💡 **Lưu ý:** Em hãy chụp màn hình mã QR này. Khi ra về, hãy đưa cho Bảo vệ quét hoặc tự quét để xác nhận 'Giờ Ra' nhé!")
         df = pd.read_excel(FILE_NAME)
     
         
@@ -167,6 +167,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
