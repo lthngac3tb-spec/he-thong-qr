@@ -3,4 +3,4 @@ pandas
 openpyxl
 qrcode
 Pillow
-streamlit-camera-qrcode-reader
+streamlit-qr-reader
