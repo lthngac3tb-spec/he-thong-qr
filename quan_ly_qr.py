@@ -78,14 +78,14 @@ if user_role == "Khách hàng":
                     "GioRa": [""]
                 })
                 
-                # Code lưu file Excel (như cũ của em)
+                # Code lưu file Excel 
                 df = pd.read_excel(FILE_NAME)
                 df = pd.concat([df, new_data], ignore_index=True)
                 df.to_excel(FILE_NAME, index=False)
                 
                 st.success(f"Đã đăng ký thành công! Người cần gặp: {chi_tiet_gap_ai}")
                 st.info(f"Mã định danh của em là: {new_id}")
-                # (Đoạn này em có thể thêm code hiển thị QR nếu muốn)
+               
 
     # PHẦN DÀNH CHO BẢO VỆ
    # --- PHẦN DÀNH CHO BẢO VỆ (Cập nhật mới) ---
@@ -93,11 +93,11 @@ else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
     password = st.text_input("Nhập mật khẩu quản lý", type="password")
     
-    if password == "123456": # Nhớ đổi mật khẩu của em ở đây
+    if password == "123456": 
         st.success("Đã đăng nhập quyền Bảo vệ")
         
         df = pd.read_excel(FILE_NAME)
-        # Chuyển cột GioVao sang định dạng ngày tháng để lọc nếu cần, ở đây mình lọc đơn giản
+    
         
         # 1. DANH SÁCH KHÁCH ĐANG Ở TRONG (Chưa có giờ ra)
         st.subheader("🔴 Khách đang ở trong cơ quan")
@@ -143,6 +143,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
