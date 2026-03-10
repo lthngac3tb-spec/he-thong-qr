@@ -93,19 +93,30 @@ else:
         
         st.divider()
         st.subheader("💾 Quản lý dữ liệu")
+        
+        # 1. Lấy ngày hiện tại để đặt tên file
+        ngay_hien_tai = datetime.now().strftime("%d-%m-%Y")
+        ten_file_xuat = f"Danh_sach_khach_{ngay_hien_tai}.xlsx"
+        
         col1, col2 = st.columns(2)
         with col1:
+            # 2. Mở file và tạo nút tải với tên file mới
             with open(FILE_NAME, "rb") as f:
-                st.download_button("📥 Tải File Excel Full", f, file_name=FILE_NAME)
+                st.download_button(
+                    label="📥 Tải File Excel Full", 
+                    data=f, 
+                    file_name=ten_file_xuat, # Tên file sẽ tự đổi theo ngày
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
         with col2:
             if st.button("🗑️ Xóa toàn bộ dữ liệu (Reset)"):
-                # Tạo file mới trắng tinh
                 df_new = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "GioVao", "GioRa"])
                 df_new.to_excel(FILE_NAME, index=False)
                 st.warning("Đã xóa dữ liệu. Hãy F5 lại trang.")
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
