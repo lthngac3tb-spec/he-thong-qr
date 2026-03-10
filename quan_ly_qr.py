@@ -60,7 +60,6 @@ if user_role == "Khách hàng":
         st.success("Đăng ký thành công! Hãy chụp lại mã này để đưa bảo vệ khi về:")
         st.image("guest_qr.png", width=300)
 
-else:
     # PHẦN DÀNH CHO BẢO VỆ
    # --- PHẦN DÀNH CHO BẢO VỆ (Cập nhật mới) ---
 else:
@@ -107,5 +106,6 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
