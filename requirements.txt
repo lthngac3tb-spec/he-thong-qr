@@ -3,4 +3,3 @@ pandas
 openpyxl
 qrcode
 Pillow
-streamlit-qr-reader
