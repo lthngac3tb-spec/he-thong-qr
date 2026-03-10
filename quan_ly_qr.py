@@ -3,6 +3,7 @@ import pandas as pd
 import qrcode
 from datetime import datetime
 import os
+import uuid
 
 # Cấu hình file
 FILE_NAME = "danh_sach_khach.xlsx"
@@ -136,6 +137,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
