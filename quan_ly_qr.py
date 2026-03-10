@@ -53,7 +53,7 @@ with tab1:
         
         # TẠO LINK XÁC NHẬN RA (Link của app em + ID khách)
         # Thay link dưới đây bằng link app thực tế của em
-        app_url = "https://he-thong-qr-n4rgxnkpvjqua3egyw6wfz.streamlit.app/"
+        app_url = "https://he-thong-qr-nqyadvkjvwh74wnm84v5or.streamlit.app/"
         checkout_url = f"{app_url}?checkout_id={guest_id}"
         
         # Tạo QR chứa cái link đó
@@ -67,3 +67,4 @@ with tab2:
     st.dataframe(pd.read_excel(FILE_NAME))
     with open(FILE_NAME, "rb") as f:
         st.download_button("📥 Tải File Excel", f, file_name=FILE_NAME)
+
