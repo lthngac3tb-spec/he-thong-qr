@@ -52,7 +52,7 @@ if user_role == "Khách hàng":
         df.to_excel(FILE_NAME, index=False)
         
         # Link để quét ra (Nhớ sửa link app của em cho đúng nhé)
-        app_url = "https://he-thong-qr-n4rgxnkpvjqua3egyw6wfz.streamlit.app/"
+        app_url = "https://he-thong-qr-yq76udatzyox4wdfbr8n6q.streamlit.app/"
         checkout_url = f"{app_url}?checkout_id={guest_id}"
         
         qr_img = qrcode.make(checkout_url)
@@ -81,3 +81,4 @@ else:
             st.download_button("📥 Tải File Excel Full", f, file_name=FILE_NAME)
     elif password != "":
         st.error("Sai mật khẩu rồi em ơi!")
+
