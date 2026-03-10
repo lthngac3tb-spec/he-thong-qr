@@ -8,6 +8,40 @@ from io import BytesIO
 
 # Cấu hình file
 FILE_NAME = "danh_sach_khach.xlsx"
+# --- ĐOẠN CODE ĐÓN ĐẦU KHÁCH QUÉT MÃ QR ĐỂ CHECK-OUT (BƯỚC 2) ---
+# Lấy các tham số từ địa chỉ web (URL)
+params = st.query_params
+
+if "action" in params and params["action"] == "checkout":
+    target_id = params.get("id")
+    
+    st.title("🚀 XÁC NHẬN RA VỀ")
+    st.info(f"Đang xử lý cho khách có mã ID: {target_id}")
+    
+    # Đọc file để cập nhật giờ ra
+    if os.path.exists(FILE_NAME):
+        df = pd.read_excel(FILE_NAME)
+        # Kiểm tra xem ID có tồn tại trong cột 'ID' không
+        if target_id in df['ID'].astype(str).values:
+            # Tìm dòng có ID đó và chưa có giờ ra (GioRa trống)
+            mask = (df['ID'].astype(str) == target_id) & (df['GioRa'].isna() | (df['GioRa'] == ""))
+            
+            if mask.any():
+                # Ghi giờ ra hiện tại
+                df.loc[mask, 'GioRa'] = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
+                df.to_excel(FILE_NAME, index=False)
+                
+                st.success("✅ Cảm ơn em! Hệ thống đã ghi nhận giờ ra về thành công.")
+                st.balloons() # Bắn pháo hoa chúc mừng
+                st.info("Em có thể đóng trình duyệt này được rồi.")
+            else:
+                st.warning("⚠️ Mã này đã báo ra trước đó rồi hoặc không cần báo lại.")
+        else:
+            st.error("❌ Không tìm thấy mã định danh này trong danh sách.")
+    
+    # Cực kỳ quan trọng: Dừng toàn bộ các lệnh bên dưới lại
+    st.stop() 
+# -------------------------------------------------------------
 if not os.path.exists(FILE_NAME):
     df = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "GioVao", "GioRa"])
     df.to_excel(FILE_NAME, index=False)
@@ -95,8 +129,10 @@ if user_role == "Khách hàng":
                 st.success(f"Đã đăng ký thành công gặp: {chi_tiet_gap_ai}")
 
                 # 3. TẠO VÀ HIỂN THỊ QR (Phần này phải nằm ở đây mới đúng)
+               # --- ĐOẠN CODE TẠO QR THÔNG MINH (BƯỚC 1) ---
                 link_goc = "https://he-thong-qr-yq76udatzyox4wdfbr8n6q.streamlit.app/"
-                link_bao_ra = f"{link_goc}?id={new_id}"
+    # Thêm ?action=checkout để máy biết đây là lệnh "Báo ra"
+                link_bao_ra = f"{link_goc}?action=checkout&id={new_id}"
                 
                 qr = qrcode.QRCode(version=1, box_size=10, border=4)
                 qr.add_data(link_bao_ra)
@@ -170,6 +206,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
