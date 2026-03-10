@@ -3,6 +3,7 @@ import pandas as pd
 import qrcode
 from datetime import datetime
 import os
+from streamlit_qrcode_scanner import qrcode_scanner
 
 # 1. Khởi tạo file Excel nếu chưa có
 FILE_NAME = "danh_sach_khach.xlsx"
@@ -46,24 +47,38 @@ with tab1:
 
 # --- PHẦN 2: BẢO VỆ CHECK-OUT ---
 with tab2:
-    st.header("Bảo vệ quét mã khi khách ra")
-    # Giả lập quét QR bằng cách nhập ID (Hoặc dùng camera nếu cấu hình thêm)
-    id_input = st.text_input("Nhập mã ID từ ảnh QR của khách (Ví dụ: QR_123...)")
-    btn_checkout = st.button("Xác nhận khách ra")
+    st.header("🔍 Bảo vệ quét mã khi khách ra")
+    st.info("Hướng camera điện thoại vào mã QR của khách")
+    
+    # Mở camera để quét mã QR
+    # Khi quét thành công, nó sẽ tự trả về cái ID của khách vào biến 'captured_id'
+    captured_id = qrcode_scanner(key='scanner_checkout')
 
-    if btn_checkout:
+    if captured_id:
+        st.warning(f"Đã nhận diện mã: {captured_id}")
+        
+        # Đọc dữ liệu từ Excel
         df = pd.read_excel(FILE_NAME)
-        if id_input in df['ID'].values:
-            idx = df.index[df['ID'] == id_input].tolist()[0]
+        
+        # Kiểm tra ID có trong danh sách không
+        if captured_id in df['ID'].values:
+            idx = df.index[df['ID'] == captured_id].tolist()[0]
+            
+            # Kiểm tra xem khách đã báo ra chưa
             if pd.isna(df.at[idx, 'GioRa']) or df.at[idx, 'GioRa'] == "":
                 df.at[idx, 'GioRa'] = datetime.now().strftime("%H:%M:%S %d/%m/%Y")
                 df.to_excel(FILE_NAME, index=False)
-                st.balloons()
-                st.success(f"Khách {df.at[idx, 'HoTen']} đã check-out thành công!")
+                st.balloons() # Bắn pháo hoa chúc mừng
+                st.success(f"✅ KHÁCH RA THÀNH CÔNG: {df.at[idx, 'HoTen']}")
             else:
-                st.warning("Khách này đã báo ra trước đó rồi.")
+                st.info("Mã này đã ghi nhận giờ ra trước đó rồi.")
         else:
-            st.error("Không tìm thấy mã ID này trong hệ thống!")
+            st.error("❌ Mã QR này không có trong hệ thống hoặc không đúng định dạng!")
+
+    # Hiển thị bảng danh sách phía dưới để bảo vệ theo dõi
+    st.divider()
+    st.subheader("📊 Danh sách thực tế")
+    st.dataframe(pd.read_excel(FILE_NAME))
 
 # Hiển thị bảng dữ liệu thực tế cho bảo vệ xem
   
@@ -77,3 +92,4 @@ with tab2:
         st.dataframe(df_view.sort_index(ascending=False), use_container_width=True)
     except:
         st.write("Chưa có dữ liệu khách nào.")
+
