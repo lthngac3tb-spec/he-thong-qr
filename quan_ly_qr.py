@@ -31,9 +31,9 @@ if "action" in params and params["action"] == "checkout":
                 df.loc[mask, 'GioRa'] = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
                 df.to_excel(FILE_NAME, index=False)
                 
-                st.success("✅ Cảm ơn em! Hệ thống đã ghi nhận giờ ra về thành công.")
+                st.success("✅ Cảm ơn quý khách! Hệ thống đã ghi nhận giờ ra về thành công.")
                 st.balloons() # Bắn pháo hoa chúc mừng
-                st.info("Em có thể đóng trình duyệt này được rồi.")
+                st.info("Xin chào và hẹn gặp lại!")
             else:
                 st.warning("⚠️ Mã này đã báo ra trước đó rồi hoặc không cần báo lại.")
         else:
@@ -145,7 +145,7 @@ if user_role == "Khách hàng":
 
                 st.divider()
                 st.image(byte_im, caption=f"Mã định danh: {new_id}", use_container_width=True)
-                st.info("💡 Chụp màn hình mã này để quét khi ra về em nhé!")
+                st.info("💡 Quý khách vui lòng lưu lại mã QR này để check out nhé!")
 
     # PHẦN DÀNH CHO BẢO VỆ
    # --- PHẦN DÀNH CHO BẢO VỆ (Cập nhật mới) ---
@@ -206,6 +206,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
