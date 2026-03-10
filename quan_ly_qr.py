@@ -117,37 +117,15 @@ else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
     password = st.text_input("Nhập mật khẩu quản lý", type="password")
     
-    if password == "123456": 
-        st.success("Đã đăng nhập quyền Bảo vệ")
-        # --- ĐOẠN CODE TẠO VÀ HIỂN THỊ MÃ QR CHÍNH XÁC ---
-        # Ghép link app của em với ID của khách
-        link_goc = "https://he-thong-qr-yq76udatzyox4wdfbr8n6q.streamlit.app/"
-        link_bao_ra = f"{link_goc}?id={new_id}" 
-                
-                # Tạo hình ảnh QR
-        qr = qrcode.QRCode(version=1, box_size=10, border=4)
-        qr.add_data(link_bao_ra)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
-
-                # Chuyển đổi để hiển thị trên Streamlit
-        from io import BytesIO
-        buf = BytesIO()
-        img.save(buf, format="PNG")
-        byte_im = buf.getvalue()
-
-        st.divider()
-        st.markdown("<h3 style='text-align: center; color: green;'>✅ ĐĂNG KÝ THÀNH CÔNG!</h3>", unsafe_allow_html=True)
-                
-                # Hiển thị ảnh QR ra màn hình
-        st.image(byte_im, caption=f"Mã định danh của em: {new_id}", use_container_width=True)
-                
-        st.info("💡 **Lưu ý:** Em hãy chụp màn hình mã QR này. Khi ra về, hãy đưa cho Bảo vệ quét hoặc tự quét để xác nhận 'Giờ Ra' nhé!")
-        df = pd.read_excel(FILE_NAME)
-    
+    if password == "123456":
+        st.success("🛡️ Đã đăng nhập quyền Bảo vệ/Quản trị")
         
-        # 1. DANH SÁCH KHÁCH ĐANG Ở TRONG (Chưa có giờ ra)
+        # Đọc dữ liệu từ file Excel
+        df = pd.read_excel(FILE_NAME)
+        
+        # --- 1. HIỂN THỊ DANH SÁCH KHÁCH ĐANG Ở TRONG ---
         st.subheader("🔴 Khách đang ở trong cơ quan")
+        # Lọc những người chưa có Giờ Ra (GioRa trống)
         khach_trong = df[df['GioRa'].isna() | (df['GioRa'] == "")]
         if not khach_trong.empty:
             st.dataframe(khach_trong, use_container_width=True)
@@ -156,40 +134,43 @@ else:
 
         st.divider()
 
-        # 2. DANH SÁCH KHÁCH ĐÃ RA VỀ (Đã có giờ ra)
+        # --- 2. HIỂN THỊ DANH SÁCH KHÁCH ĐÃ RA VỀ ---
         st.subheader("🟢 Khách đã ra về trong ngày")
+        # Lọc những người đã có Giờ Ra
         khach_ve = df[df['GioRa'].notna() & (df['GioRa'] != "")]
         if not khach_ve.empty:
-            # Đảo ngược danh sách để người mới về hiện lên đầu
+            # iloc[::-1] để người mới về hiện lên đầu cho dễ nhìn
             st.dataframe(khach_ve.iloc[::-1], use_container_width=True)
         else:
             st.info("Chưa có khách nào báo ra về.")
         
         st.divider()
-        st.subheader("💾 Quản lý dữ liệu")
         
-        # 1. Lấy ngày hiện tại để đặt tên file
+        # --- 3. QUẢN LÝ DỮ LIỆU ---
+        st.subheader("💾 Công cụ quản lý")
+        
+        # Lấy ngày hiện tại để đặt tên file tải về
         ngay_hien_tai = datetime.now().strftime("%d-%m-%Y")
         ten_file_xuat = f"Danh_sach_khach_{ngay_hien_tai}.xlsx"
         
         col1, col2 = st.columns(2)
         with col1:
-            # 2. Mở file và tạo nút tải với tên file mới
             with open(FILE_NAME, "rb") as f:
                 st.download_button(
                     label="📥 Tải File Excel Full", 
                     data=f, 
-                    file_name=ten_file_xuat, # Tên file sẽ tự đổi theo ngày
+                    file_name=ten_file_xuat,
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
         with col2:
-            if st.button("🗑️ Xóa toàn bộ dữ liệu (Reset)"):
+            if st.button("🗑️ Xóa dữ liệu (Reset ngày mới)"):
                 df_new = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "GioVao", "GioRa"])
                 df_new.to_excel(FILE_NAME, index=False)
-                st.warning("Đã xóa dữ liệu. Hãy F5 lại trang.")
+                st.warning("Đã xóa toàn bộ dữ liệu. Hãy F5 trang web.")
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
