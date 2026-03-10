@@ -37,49 +37,55 @@ user_role = st.sidebar.selectbox("Bạn là ai?", ["Khách hàng", "Bảo vệ /
 
 if user_role == "Khách hàng":
         st.title("📝 ĐĂNG KÝ VÀO CỔNG")
-        with st.form("checkin_form"):
-            name = st.text_input("Họ và tên")
-            phone = st.text_input("Số điện thoại")
+        
+        # 1. Để các ô nhập liệu RA NGOÀI st.form để nó phản hồi ngay lập tức
+        name = st.text_input("Họ và tên")
+        phone = st.text_input("Số điện thoại")
 
-            # --- PHẦN CHỌN NGƯỜI CẦN GẶP THÔNG MINH ---
-            danh_sach_nhom = ["Ban giám hiệu", "Đoàn trường", "GVCN", "Hành chính", "Khác"]
-            lua_chon = st.selectbox("Bộ phận/Người cần gặp", danh_sach_nhom)
-            
-            # Khởi tạo các ô nhập bổ sung
-            ten_lop = ""
-            nguoi_cu_the = ""
-            if lua_chon == "GVCN":
-                ten_lop = st.text_input("Nhập tên lớp (Ví dụ: 12A1)")
-            elif lua_chon == "Khác":
-                nguoi_cu_the = st.text_input("Nhập tên người/bộ phận cụ thể")
-            # ------------------------------------------
+        danh_sach_nhom = ["Ban giám hiệu", "Đoàn trường", "GVCN", "Hành chính", "Khác"]
+        lua_chon = st.selectbox("Bộ phận/Người cần gặp", danh_sach_nhom)
+        
+        # Logic hiện ô nhập bổ sung ngay lập tức
+        ten_lop = ""
+        nguoi_cu_the = ""
+        chi_tiet_gap_ai = ""
 
-            submit = st.form_submit_button("Lấy mã QR")
+        if lua_chon == "GVCN":
+            ten_lop = st.text_input("Nhập tên lớp (Ví dụ: 12A1)")
+            chi_tiet_gap_ai = f"GVCN lớp {ten_lop}" if ten_lop else ""
+        elif lua_chon == "Khác":
+            nguoi_cu_the = st.text_input("Nhập tên người/bộ phận cụ thể")
+            chi_tiet_gap_ai = nguoi_cu_the
+        else:
+            chi_tiet_gap_ai = lua_chon
 
-            if submit:
-                # Xử lý logic lấy giá trị cuối cùng để lưu
-                if lua_chon == "GVCN":
-                    chi_tiet_gap_ai = f"GVCN lớp {ten_lop}"
-                elif lua_chon == "Khác":
-                    chi_tiet_gap_ai = nguoi_cu_the
-                else:
-                    chi_tiet_gap_ai = lua_chon
-
-                if name and phone and chi_tiet_gap_ai:
-                    # Đoạn này là để lưu vào Excel của em
-                    now = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
-                    new_data = pd.DataFrame({
-                        "ID": [str(uuid.uuid4())[:8]],
-                        "HoTen": [name],
-                        "SDT": [phone],
-                        "GapAi": [chi_tiet_gap_ai],
-                        "GioVao": [now],
-                        "GioRa": [""]
-                    })
-                    # Code lưu file Excel tiếp theo của em...
-                    st.success(f"Đã đăng ký thành công gặp: {chi_tiet_gap_ai}")
-                else:
-                    st.error("Vui lòng nhập đầy đủ thông tin em nhé!")
+        # 2. Chỉ để nút bấm vào trong form hoặc dùng nút bấm bình thường
+        if st.button("Lấy mã QR"):
+            # Kiểm tra xem đã nhập đủ chưa trước khi cho phép chạy tiếp
+            if not name or not phone or not chi_tiet_gap_ai:
+                st.error("⚠️ Vui lòng nhập đầy đủ thông tin (Họ tên, SĐT, Lớp/Người cần gặp) trước khi lấy mã!")
+            else:
+                # Nếu đủ thông tin thì mới tiến hành lưu
+                now = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
+                new_id = str(uuid.uuid4())[:8]
+                
+                new_data = pd.DataFrame({
+                    "ID": [new_id],
+                    "HoTen": [name],
+                    "SDT": [phone],
+                    "GapAi": [chi_tiet_gap_ai],
+                    "GioVao": [now],
+                    "GioRa": [""]
+                })
+                
+                # Code lưu file Excel (như cũ của em)
+                df = pd.read_excel(FILE_NAME)
+                df = pd.concat([df, new_data], ignore_index=True)
+                df.to_excel(FILE_NAME, index=False)
+                
+                st.success(f"Đã đăng ký thành công! Người cần gặp: {chi_tiet_gap_ai}")
+                st.info(f"Mã định danh của em là: {new_id}")
+                # (Đoạn này em có thể thêm code hiển thị QR nếu muốn)
 
     # PHẦN DÀNH CHO BẢO VỆ
    # --- PHẦN DÀNH CHO BẢO VỆ (Cập nhật mới) ---
@@ -137,6 +143,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
