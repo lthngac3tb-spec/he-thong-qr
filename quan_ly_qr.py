@@ -59,7 +59,7 @@ if user_role == "Khách hàng":
     elif lua_chon == "Hành chính":
         chi_tiet_gap_ai = "Phòng Hành chính"
         # HIỆN Ô MỤC ĐÍCH KHI CHỌN HÀNH CHÍNH
-        muc_dich_cv = st.text_area("🎯 Mục đích công việc (Bắt buộc):", placeholder="Ví dụ: Nộp hồ sơ, Công chứng...")
+        muc_dich_cv = st.text_area("🎯 Mục đích công việc (Bắt buộc):", placeholder="Ví dụ: Rút hồ sơ, Lấy bằng,...")
     elif lua_chon == "Khác":
         nguoi_cu_the = st.text_input("Nhập tên người/bộ phận cụ thể")
         chi_tiet_gap_ai = nguoi_cu_the
@@ -140,3 +140,4 @@ else:
             
     elif password != "":
         st.error("Sai mật khẩu!")
+
