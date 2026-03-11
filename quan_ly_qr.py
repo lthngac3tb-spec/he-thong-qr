@@ -71,6 +71,8 @@ if user_role == "Khách hàng":
             st.error("Vui lòng nhập đủ tên và SĐT!")
 
 # --- PHẦN DÀNH CHO BẢO VỆ (Giữ nguyên logic cũ, chỉ nâng cấp xuất file) ---
+# ... (Phần trên là code đăng ký của khách, em giữ nguyên) ...
+
 else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
     password = st.text_input("Nhập mật khẩu quản lý", type="password")
@@ -78,78 +80,69 @@ else:
     if password == "123456":
         st.success("🛡️ Đã đăng nhập quyền Bảo vệ/Quản trị")
         
-        # Đọc dữ liệu từ file Excel hiện tại
+        # Đọc dữ liệu từ file Excel
         df = pd.read_excel(FILE_NAME)
         
+        # Hiển thị bảng dữ liệu (Để bảo vệ xem trên web)
         st.subheader("🔴 Khách đang ở trong cơ quan")
-        khach_trong = df[df['GioRa'].isna() | (df['GioRa'] == "")]
-        st.dataframe(khach_trong, use_container_width=True)
+        st.dataframe(df, use_container_width=True)
 
         st.divider()
 
-        st.subheader("🟢 Khách đã ra về trong ngày")
-        khach_ve = df[df['GioRa'].notna() & (df['GioRa'] != "")]
-        st.dataframe(khach_ve.iloc[::-1], use_container_width=True)
+        # >>> EM DÁN ĐOẠN "DƯỚI" VÀO ĐÂY <<<
+        st.subheader("📝 Chuẩn bị file báo cáo")
         
-        st.divider()
-        
-        # --- ĐOẠN NÂNG CẤP XUẤT FILE ĐẸP ---
-        st.subheader("💾 Công cụ quản lý")
-        
-        # 1. Tạo tên file có ngày hiện tại
-        ngay_hien_tai = datetime.now().strftime("%d-%m-%Y")
-        ten_file_xuat = f"Danh_sach_khach_{ngay_hien_tai}.xlsx"
-        
-        # 2. Logic tạo file Excel trang trí đẹp
-        buffer = BytesIO()
-        # Sử dụng xlsxwriter để kẻ bảng và tô màu
-        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-            df.to_excel(writer, index=False, sheet_name='Bao_cao')
+        from openpyxl.styles import Alignment, Border, Side, Font, PatternFill
+        from openpyxl.utils import get_column_letter
+        from openpyxl import Workbook
+        import io
+
+        if st.button("📊 Xuất Báo Cáo Khách (Bản Đẹp)"):
+            ngay_hien_tai = datetime.now().strftime("%d_%m_%Y")
+            buffer = io.BytesIO()
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "BaoCaoKhach"
+
+            headers = list(df.columns)
+            ws.append(headers)
+
+            for r in df.values.tolist():
+                row_data = [str(x) if str(x) != 'nan' else "" for x in r]
+                ws.append(row_data)
             
-            workbook  = writer.book
-            worksheet = writer.sheets['Bao_cao']
-
-            # Định dạng Tiêu đề (Header)
-            header_format = workbook.add_format({
-                'bold': True,
-                'border': 1,
-                'align': 'center',
-                'valign': 'vcenter',
-                'fg_color': '#D7E4BC' # Màu xanh lá nhạt
-            })
-
-            # Định dạng Nội dung (Cells)
-            cell_format = workbook.add_format({
-                'border': 1,
-                'align': 'left',
-                'valign': 'vcenter'
-            })
-
-            # Vẽ lại Header với định dạng
-            for col_num, value in enumerate(df.columns.values):
-                worksheet.write(0, col_num, value, header_format)
+            # ĐỊNH DẠNG MÀU XANH + KẺ BẢNG (Giống hệ thống điện thoại)
+            blue_fill = PatternFill(start_color="B8CCE4", end_color="B8CCE4", fill_type="solid")
+            thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
             
-            # Vẽ lại dữ liệu và kẻ bảng từng ô
-            for row_num in range(1, len(df) + 1):
-                for col_num in range(len(df.columns)):
-                    # Lấy giá trị, nếu nan thì để rỗng
-                    val = df.iloc[row_num-1, col_num]
-                    if pd.isna(val): val = ""
-                    worksheet.write(row_num, col_num, str(val), cell_format)
-
+            for col_num in range(1, len(headers) + 1):
+                cell = ws.cell(row=1, column=col_num)
+                cell.fill = blue_fill
+                cell.font = Font(bold=True)
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = thin_border
+            
+            for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
+                for cell in row:
+                    cell.border = thin_border
+            
             # Tự động chỉnh độ rộng cột
-            for i, col in enumerate(df.columns):
-                column_len = max(df[col].astype(str).map(len).max(), len(col)) + 2
-                worksheet.set_column(i, i, column_len)
+            column_widths = [15, 25, 15, 20, 30, 20, 20] 
+            for i, width in enumerate(column_widths):
+                if i < len(headers):
+                    ws.column_dimensions[get_column_letter(i + 1)].width = width
 
-        # 3. Nút tải file
-        st.download_button(
-            label="📥 Tải File Excel Báo Cáo (Đã kẻ bảng)",
-            data=buffer.getvalue(),
-            file_name=ten_file_xuat,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-        
+            wb.save(buffer)
+            st.download_button(
+                label="📥 Tải file về máy ngay",
+                data=buffer.getvalue(),
+                file_name=f"Bao_cao_khach_{ngay_hien_tai}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+        # >>> KẾT THÚC ĐOẠN DÁN <<<
+
+        st.divider()
+               
         # Nút Reset dữ liệu (Giữ nguyên của em)
         if st.button("🗑️ Xóa dữ liệu (Reset ngày mới)"):
             df_new = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "MucDich", "GioVao", "GioRa"])
@@ -158,4 +151,5 @@ else:
             
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
