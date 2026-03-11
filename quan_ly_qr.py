@@ -103,7 +103,7 @@ if user_role == "Khách hàng":
             st.success(f"Đã đăng ký thành công!")
 
             # Tạo QR
-            link_goc = "https://he-thong-qr-yq76udatzyox4wdfbr8n6q.streamlit.app/"
+            link_goc = "https://he-thong-quan-ly-khach-ra-vao.streamlit.app/"
             link_bao_ra = f"{link_goc}?action=checkout&id={new_id}"
             
             qr = qrcode.QRCode(version=1, box_size=10, border=4)
@@ -140,4 +140,5 @@ else:
             
     elif password != "":
         st.error("Sai mật khẩu!")
+
 
