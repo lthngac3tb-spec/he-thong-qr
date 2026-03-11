@@ -71,7 +71,7 @@ st.sidebar.title("🔑 QUẢN TRỊ")
 user_role = st.sidebar.selectbox("Bạn là ai?", ["Khách hàng", "Bảo vệ / Admin"])
 
 if user_role == "Khách hàng":
-        st.title("📝 ĐĂNG KÝ VÀO CỔNG")
+        st.title("📝 ĐĂNG KÝ LIÊN HỆ CÔNG TÁC")
         
         # Nhập thông tin cơ bản
         name = st.text_input("Họ và tên")
@@ -206,6 +206,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
