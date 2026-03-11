@@ -84,12 +84,16 @@ if user_role == "Khách hàng":
         chi_tiet_gap_ai = ""
         ten_lop = ""
         nguoi_cu_the = ""
+        lam_gi = ""
 
         if lua_chon == "GVCN":
             ten_lop = st.text_input("Nhập tên lớp (Ví dụ: 12A1)")
             chi_tiet_gap_ai = f"GVCN lớp {ten_lop}"
         elif lua_chon == "Khác":
             nguoi_cu_the = st.text_input("Nhập tên người/bộ phận cụ thể")
+            chi_tiet_gap_ai = nguoi_cu_the
+        elif lua_chon == "Hành chính":
+            lam_gi = st.text_input("Nhập công việc cần làm (VD: Lấy bằng; Rút hồ sơ)")
             chi_tiet_gap_ai = nguoi_cu_the
         else:
             chi_tiet_gap_ai = lua_chon
@@ -206,6 +210,7 @@ else:
     
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
 
