@@ -97,34 +97,37 @@ if user_role == "Khách hàng":
                 df_curr = pd.concat([df_curr, pd.DataFrame([new_row])], ignore_index=True)
                 df_curr.to_excel(FILE_NAME, index=False)
                 
-                # --- PHẦN TẠO VÀ HIỂN THỊ QR (CẬP NHẬT CÓ NÚT TẢI) ---
+               # --- PHẦN TẠO QR SIÊU TƯƠNG THÍCH MOBILE ---
                 link_goc = "https://he-thong-quan-ly-khach-ra-vao.streamlit.app/" 
                 qr_content = f"{link_goc}?action=checkout&id={new_id}"
                 
-                # Tạo ảnh QR sắc nét hơn
+                # Tạo QR
                 qr = qrcode.QRCode(version=3, box_size=15, border=4)
                 qr.add_data(qr_content)
                 qr.make(fit=True)
                 img = qr.make_image(fill_color="black", back_color="white")
 
-                # Lưu vào bộ nhớ đệm
-                buf = BytesIO()
-                img.save(buf, format="PNG")
-                byte_im = buf.getvalue()
+                # Dùng BytesIO với con trỏ được kiểm soát chặt chẽ
+                img_buffer = BytesIO()
+                img.save(img_buffer, format="PNG")
+                img_data = img_buffer.getvalue() # Lấy dữ liệu ra biến riêng
 
                 st.divider()
-                # 1. Hiển thị ảnh QR cho khách xem/chụp
-                st.image(byte_im, caption="MÃ XÁC NHẬN RA VỀ", width=300)
+                st.subheader("📸 MÃ XÁC NHẬN CỦA BẠN")
+                
+                # Hiển thị ảnh
+                st.image(img_data, width=300)
 
-                # 2. Nút bấm tải QR về máy (Linh hồn mới đây!)
+                # NÚT TẢI (Sử dụng data đã lấy sẵn để điện thoại không bị delay)
                 st.download_button(
                     label="📥 BẤM VÀO ĐÂY ĐỂ LƯU MÃ QR",
-                    data=byte_im,
-                    file_name=f"Ma_QR_Ra_Ve_{name}.png",
-                    mime="image/png"
+                    data=img_data,
+                    file_name=f"Ma_QR_{new_id}.png",
+                    mime="image/png",
+                    use_container_width=True # Làm nút to ra cho dễ bấm trên điện thoại
                 )
                 
-                st.success(f"✨ Đăng ký thành công! Quý khách vui lòng LƯU MÃ để báo ra khi về.")
+                st.success("✨ Đã sẵn sàng! Nếu bấm nút tải không được, bạn hãy nhấn giữ vào hình ảnh rồi chọn 'Lưu ảnh' nhé!")
         else:
             st.error("Vui lòng nhập đủ tên và SĐT!")
 
@@ -234,6 +237,7 @@ else:
             
     elif password != "":
         st.error("Mật khẩu không chính xác!")
+
 
 
 
