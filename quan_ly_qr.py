@@ -48,7 +48,7 @@ if "action" in params and params["action"] == "checkout":
                     <h3 style="color: #444; text-align: center;">HẸN GẶP LẠI!</h3>
                     <p style="text-align: center; font-style: italic;">Hệ thống đã ghi nhận giờ ra về của bạn vào lúc: {datetime.now().strftime("%H:%M")}</p>
                 </div>
-            """, unsafe_allow_index=True)
+            """, unsafe_allow_html=True)
             
             # Bắn pháo hoa chúc mừng khách ra về vui vẻ
             st.balloons() 
@@ -213,6 +213,7 @@ else:
             
     elif password != "":
         st.error("Mật khẩu không chính xác!")
+
 
 
 
