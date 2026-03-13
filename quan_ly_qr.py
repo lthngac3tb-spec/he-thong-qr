@@ -17,20 +17,56 @@ if not os.path.exists(FILE_NAME):
 st.set_page_config(page_title="Hệ thống QR Khách", layout="centered")
 
 # --- PHẦN XỬ LÝ CHECK-OUT QUA QR  ---
+# --- ĐOẠN XỬ LÝ KHI KHÁCH QUÉT QR RA VỀ ---
 params = st.query_params
 if "action" in params and params["action"] == "checkout":
     target_id = params.get("id")
+    
+    # Hiển thị tiêu đề trang trọng
     st.title("🚀 XÁC NHẬN RA VỀ")
-    df = pd.read_excel(FILE_NAME)
-    mask = (df['ID'].astype(str) == target_id) & (df['GioRa'].isna() | (df['GioRa'] == ""))
-    if mask.any():
-        df.loc[mask, 'GioRa'] = datetime.now().strftime("%H:%M %d/%m/%Y")
-        df.to_excel(FILE_NAME, index=False)
-        st.success("✅ Cảm ơn quý khách! Đã ghi nhận giờ ra.")
-        st.balloons()
-    else:
-        st.warning("Mã này đã báo ra hoặc không tồn tại.")
-    st.stop()
+    
+    if os.path.exists(FILE_NAME):
+        df = pd.read_excel(FILE_NAME)
+        # Kiểm tra ID và trạng thái
+        mask = (df['ID'].astype(str) == target_id) & (df['GioRa'].isna() | (df['GioRa'] == ""))
+        
+        if mask.any():
+            # Lấy tên khách để chào cho thân thiện
+            ten_khach = df.loc[mask, 'HoTen'].values[0]
+            
+            # Ghi giờ ra
+            df.loc[mask, 'GioRa'] = datetime.now().strftime("%H:%M %d/%m/%Y")
+            df.to_excel(FILE_NAME, index=False)
+            
+            # --- HIỂN THỊ THÔNG BÁO CẢM ƠN SIÊU ĐẸP ---
+            st.success(f"✅ Xác nhận thành công cho khách: **{ten_khach}**")
+            
+            # Tạo một khung thông báo lớn và trang trọng
+            st.markdown(f"""
+                <div style="background-color: #f0f2f6; padding: 30px; border-radius: 15px; border-left: 10px solid #00a010; margin-top: 20px;">
+                    <h2 style="color: #008000; text-align: center;">🙏 CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
+                    <h3 style="color: #444; text-align: center;">HẸN GẶP LẠI!</h3>
+                    <p style="text-align: center; font-style: italic;">Hệ thống đã ghi nhận giờ ra về của bạn vào lúc: {datetime.now().strftime("%H:%M")}</p>
+                </div>
+            """, unsafe_allow_index=True)
+            
+            # Bắn pháo hoa chúc mừng khách ra về vui vẻ
+            st.balloons() 
+            
+        else:
+            # Kiểm tra xem có phải đã báo ra rồi không
+            already_out = (df['ID'].astype(str) == target_id) & (df['GioRa'].notna())
+            if already_out.any():
+                st.info("💡 Bạn đã thực hiện xác nhận ra về trước đó rồi. Chúc bạn một ngày tốt lành!")
+            else:
+                st.error("❌ Mã định danh không hợp lệ hoặc không tồn tại trong hệ thống.")
+    
+    # Nút quay lại trang chủ (nếu cần)
+    if st.button("Quay lại trang đăng ký"):
+        st.query_params.clear()
+        st.rerun()
+        
+    st.stop() # Dừng tại đây để khách không thấy phần của bảo vệ
 
 # --- GIAO DIỆN CHÍNH ---
 st.sidebar.title("🔑 QUẢN TRỊ")
@@ -177,3 +213,4 @@ else:
             
     elif password != "":
         st.error("Mật khẩu không chính xác!")
+
