@@ -97,19 +97,40 @@ if user_role == "Khách hàng":
                 df_curr = pd.concat([df_curr, pd.DataFrame([new_row])], ignore_index=True)
                 df_curr.to_excel(FILE_NAME, index=False)
                 
-                # Tạo QR (Thay link của em vào đây nhé)
+                # --- PHẦN TẠO VÀ HIỂN THỊ QR (CẬP NHẬT CÓ NÚT TẢI) ---
                 link_goc = "https://he-thong-quan-ly-khach-ra-vao.streamlit.app/" 
-                qr_img = qrcode.make(f"{link_goc}?action=checkout&id={new_id}")
+                qr_content = f"{link_goc}?action=checkout&id={new_id}"
+                
+                # Tạo ảnh QR sắc nét hơn
+                qr = qrcode.QRCode(version=3, box_size=15, border=4)
+                qr.add_data(qr_content)
+                qr.make(fit=True)
+                img = qr.make_image(fill_color="black", back_color="white")
+
+                # Lưu vào bộ nhớ đệm
                 buf = BytesIO()
-                qr_img.save(buf, format="PNG")
-                st.image(buf.getvalue(), caption="Quét mã này khi ra về", width=300)
+                img.save(buf, format="PNG")
+                byte_im = buf.getvalue()
+
+                st.divider()
+                # 1. Hiển thị ảnh QR cho khách xem/chụp
+                st.image(byte_im, caption="MÃ XÁC NHẬN RA VỀ", width=300)
+
+                # 2. Nút bấm tải QR về máy (Linh hồn mới đây!)
+                st.download_button(
+                    label="📥 BẤM VÀO ĐÂY ĐỂ LƯU MÃ QR",
+                    data=byte_im,
+                    file_name=f"Ma_QR_Ra_Ve_{name}.png",
+                    mime="image/png"
+                )
+                
+                st.success(f"✨ Đăng ký thành công! Quý khách vui lòng LƯU MÃ để báo ra khi về.")
         else:
             st.error("Vui lòng nhập đủ tên và SĐT!")
 
-# --- PHẦN DÀNH CHO BẢO VỆ (Giữ nguyên logic cũ, chỉ nâng cấp xuất file) ---
-# ... (Phần trên là code đăng ký của khách, em giữ nguyên) ...
 
-# --- PHẦN DÀNH CHO QUẢN TRỊ (BẢO VỆ) - BẢN TOÀN NĂNG ---
+
+# --- PHẦN DÀNH CHO QUẢN TRỊ (BẢO VỆ) - 
 else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
     password = st.text_input("Nhập mật khẩu quản lý", type="password")
@@ -213,6 +234,7 @@ else:
             
     elif password != "":
         st.error("Mật khẩu không chính xác!")
+
 
 
 
