@@ -73,6 +73,7 @@ if user_role == "Khách hàng":
 # --- PHẦN DÀNH CHO BẢO VỆ (Giữ nguyên logic cũ, chỉ nâng cấp xuất file) ---
 # ... (Phần trên là code đăng ký của khách, em giữ nguyên) ...
 
+# --- PHẦN DÀNH CHO QUẢN TRỊ (BẢO VỆ) - BẢN TOÀN NĂNG ---
 else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
     password = st.text_input("Nhập mật khẩu quản lý", type="password")
@@ -81,76 +82,102 @@ else:
         st.success("🛡️ Đã đăng nhập quyền Bảo vệ/Quản trị")
         
         # Đọc dữ liệu từ file Excel
-        df = pd.read_excel(FILE_NAME)
-        
-        # Hiển thị bảng dữ liệu (Để bảo vệ xem trên web)
-        st.subheader("🔴 Khách đang ở trong cơ quan")
-        st.dataframe(df, use_container_width=True)
-
-        st.divider()
-
-     
-        st.subheader("📝 Chuẩn bị file báo cáo")
-        
-        from openpyxl.styles import Alignment, Border, Side, Font, PatternFill
-        from openpyxl.utils import get_column_letter
-        from openpyxl import Workbook
-        import io
-
-        if st.button("📊 Xuất Báo Cáo Khách (Bản Đẹp)"):
-            ngay_hien_tai = datetime.now().strftime("%d_%m_%Y")
-            buffer = io.BytesIO()
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "BaoCaoKhach"
-
-            headers = list(df.columns)
-            ws.append(headers)
-
-            for r in df.values.tolist():
-                row_data = [str(x) if str(x) != 'nan' else "" for x in r]
-                ws.append(row_data)
+        if os.path.exists(FILE_NAME):
+            df = pd.read_excel(FILE_NAME)
             
-            # ĐỊNH DẠNG MÀU XANH + KẺ BẢNG (Giống hệ thống điện thoại)
-            blue_fill = PatternFill(start_color="B8CCE4", end_color="B8CCE4", fill_type="solid")
-            thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+            # --- BẢNG 1: KHÁCH ĐANG Ở TRONG ---
+            st.subheader("🔴 Khách đang ở trong cơ quan")
+            # Lọc khách có Giờ Ra trống
+            khach_trong = df[df['GioRa'].isna() | (df['GioRa'] == "")]
+            if not khach_trong.empty:
+                st.dataframe(khach_trong, use_container_width=True)
+            else:
+                st.info("Hiện không có khách nào ở trong.")
+
+            st.divider()
+
+            # --- BẢNG 2: KHÁCH ĐÃ RA VỀ ---
+            st.subheader("🟢 Khách đã ra về trong ngày")
+            # Lọc khách đã có Giờ Ra
+            khach_ve = df[df['GioRa'].notna() & (df['GioRa'] != "")]
+            if not khach_ve.empty:
+                # Hiện danh sách đảo ngược (người về mới nhất lên đầu)
+                st.dataframe(khach_ve.iloc[::-1], use_container_width=True)
+            else:
+                st.info("Chưa có khách nào báo ra về.")
+
+            st.divider()
+
+            # --- PHẦN XUẤT FILE EXCEL "PHONG CÁCH ĐIỆN THOẠI" ---
+            st.subheader("📝 Công cụ báo cáo")
             
-            for col_num in range(1, len(headers) + 1):
-                cell = ws.cell(row=1, column=col_num)
-                cell.fill = blue_fill
-                cell.font = Font(bold=True)
-                cell.alignment = Alignment(horizontal='center', vertical='center')
-                cell.border = thin_border
-            
-            for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
-                for cell in row:
+            from openpyxl.styles import Alignment, Border, Side, Font, PatternFill
+            from openpyxl.utils import get_column_letter
+            from openpyxl import Workbook
+            import io
+
+            # Nút bấm để chuẩn bị file (Giúp Mobile chạy ổn định)
+            if st.button("📊 Chuẩn bị file Excel (Bản đẹp)"):
+                ngay_hien_tai = datetime.now().strftime("%d_%m_%Y")
+                buffer = io.BytesIO()
+                wb = Workbook()
+                ws = wb.active
+                ws.title = "BaoCaoRaVao"
+
+                headers = list(df.columns)
+                ws.append(headers)
+
+                for r in df.values.tolist():
+                    row_data = [str(x) if str(x) != 'nan' else "" for x in r]
+                    ws.append(row_data)
+                
+                # --- ĐỊNH DẠNG XANH + KẺ BẢNG ---
+                blue_fill = PatternFill(start_color="B8CCE4", end_color="B8CCE4", fill_type="solid")
+                thin_border = Border(
+                    left=Side(style='thin'), right=Side(style='thin'), 
+                    top=Side(style='thin'), bottom=Side(style='thin')
+                )
+                
+                for col_num in range(1, len(headers) + 1):
+                    cell = ws.cell(row=1, column=col_num)
+                    cell.fill = blue_fill
+                    cell.font = Font(bold=True)
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
                     cell.border = thin_border
-            
-            # Tự động chỉnh độ rộng cột
-            column_widths = [15, 25, 15, 20, 30, 20, 20] 
-            for i, width in enumerate(column_widths):
-                if i < len(headers):
-                    ws.column_dimensions[get_column_letter(i + 1)].width = width
+                
+                for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
+                    for cell in row:
+                        cell.border = thin_border
+                        cell.alignment = Alignment(vertical='center')
 
-            wb.save(buffer)
-            st.download_button(
-                label="📥 Tải file về máy ngay",
-                data=buffer.getvalue(),
-                file_name=f"Bao_cao_khach_{ngay_hien_tai}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-        # >>> KẾT THÚC ĐOẠN DÁN <<<
+                # Tự chỉnh độ rộng cột
+                column_widths = [12, 25, 15, 20, 35, 20, 20] 
+                for i, width in enumerate(column_widths):
+                    if i < len(headers):
+                        ws.column_dimensions[get_column_letter(i + 1)].width = width
 
-        st.divider()
-               
-        # Nút Reset dữ liệu (Giữ nguyên của em)
-        if st.button("🗑️ Xóa dữ liệu (Reset ngày mới)"):
-            df_new = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "MucDich", "GioVao", "GioRa"])
-            df_new.to_excel(FILE_NAME, index=False)
-            st.warning("Đã xóa dữ liệu. Hãy F5 trang web.")
+                wb.save(buffer)
+                
+                # Nút tải thực sự hiện ra sau khi chuẩn bị xong
+                st.download_button(
+                    label="📥 Tải file về máy (Click để lưu)",
+                    data=buffer.getvalue(),
+                    file_name=f"Bao_cao_khach_{ngay_hien_tai}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+
+            # Nút xóa dữ liệu (Cẩn thận khi dùng)
+            st.divider()
+            if st.button("🗑️ Reset dữ liệu ngày mới"):
+                df_reset = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "MucDich", "GioVao", "GioRa"])
+                df_reset.to_excel(FILE_NAME, index=False)
+                st.warning("Đã làm sạch dữ liệu. Vui lòng F5 (Reload) trang web.")
+        else:
+            st.error("Chưa có dữ liệu khách đăng ký!")
             
     elif password != "":
-        st.error("Sai mật khẩu rồi em!")
+        st.error("Mật khẩu không chính xác!")
+
 
 
 
