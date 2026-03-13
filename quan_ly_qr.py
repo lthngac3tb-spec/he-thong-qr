@@ -16,57 +16,21 @@ if not os.path.exists(FILE_NAME):
 
 st.set_page_config(page_title="Hệ thống QR Khách", layout="centered")
 
-
-# --- ĐOẠN XỬ LÝ KHI KHÁCH QUÉT QR RA VỀ ---
+# --- PHẦN XỬ LÝ CHECK-OUT QUA QR  ---
 params = st.query_params
 if "action" in params and params["action"] == "checkout":
     target_id = params.get("id")
-    
-    # Hiển thị tiêu đề trang trọng
     st.title("🚀 XÁC NHẬN RA VỀ")
-    
-    if os.path.exists(FILE_NAME):
-        df = pd.read_excel(FILE_NAME)
-        # Kiểm tra ID và trạng thái
-        mask = (df['ID'].astype(str) == target_id) & (df['GioRa'].isna() | (df['GioRa'] == ""))
-        
-        if mask.any():
-            # Lấy tên khách để chào cho thân thiện
-            ten_khach = df.loc[mask, 'HoTen'].values[0]
-            
-            # Ghi giờ ra
-            df.loc[mask, 'GioRa'] = datetime.now().strftime("%H:%M %d/%m/%Y")
-            df.to_excel(FILE_NAME, index=False)
-            
-            # --- HIỂN THỊ THÔNG BÁO CẢM ƠN SIÊU ĐẸP ---
-            st.success(f"✅ Xác nhận thành công cho khách: **{ten_khach}**")
-            
-            # Tạo một khung thông báo lớn và trang trọng
-            st.markdown(f"""
-                <div style="background-color: #f0f2f6; padding: 30px; border-radius: 15px; border-left: 10px solid #00a010; margin-top: 20px;">
-                    <h2 style="color: #008000; text-align: center;">🙏 CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
-                    <h3 style="color: #444; text-align: center;">HẸN GẶP LẠI!</h3>
-                    <p style="text-align: center; font-style: italic;">Hệ thống đã ghi nhận giờ ra về của bạn vào lúc: {datetime.now().strftime("%H:%M")}</p>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # Bắn pháo hoa chúc mừng khách ra về vui vẻ
-            st.balloons() 
-            
-        else:
-            # Kiểm tra xem có phải đã báo ra rồi không
-            already_out = (df['ID'].astype(str) == target_id) & (df['GioRa'].notna())
-            if already_out.any():
-                st.info("💡 Bạn đã thực hiện xác nhận ra về trước đó rồi. Chúc bạn một ngày tốt lành!")
-            else:
-                st.error("❌ Mã định danh không hợp lệ hoặc không tồn tại trong hệ thống.")
-    
-    # Nút quay lại trang chủ 
-    if st.button("Quay lại trang đăng ký"):
-        st.query_params.clear()
-        st.rerun()
-        
-    st.stop() # Dừng tại đây để khách không thấy phần của bảo vệ
+    df = pd.read_excel(FILE_NAME)
+    mask = (df['ID'].astype(str) == target_id) & (df['GioRa'].isna() | (df['GioRa'] == ""))
+    if mask.any():
+        df.loc[mask, 'GioRa'] = datetime.now().strftime("%H:%M %d/%m/%Y")
+        df.to_excel(FILE_NAME, index=False)
+        st.success("✅ Cảm ơn quý khách! Đã ghi nhận giờ ra.")
+        st.balloons()
+    else:
+        st.warning("Mã này đã báo ra hoặc không tồn tại.")
+    st.stop()
 
 # --- GIAO DIỆN CHÍNH ---
 st.sidebar.title("🔑 QUẢN TRỊ")
@@ -97,58 +61,19 @@ if user_role == "Khách hàng":
                 df_curr = pd.concat([df_curr, pd.DataFrame([new_row])], ignore_index=True)
                 df_curr.to_excel(FILE_NAME, index=False)
                 
-              # --- PHẦN TẠO QR VÀ NÚT TẢI SIÊU CẤP (100% MOBILE OK) ---
-                import base64
-
+                # Tạo QR (Thay link của em vào đây nhé)
                 link_goc = "https://he-thong-quan-ly-khach-ra-vao.streamlit.app/" 
-                qr_content = f"{link_goc}?action=checkout&id={new_id}"
-                
-                qr = qrcode.QRCode(version=3, box_size=15, border=4)
-                qr.add_data(qr_content)
-                qr.make(fit=True)
-                img = qr.make_image(fill_color="black", back_color="white")
-
-                # Chuyển ảnh thành chuỗi Base64 để nhúng thẳng vào HTML
-                img_buffer = BytesIO()
-                img.save(img_buffer, format="PNG")
-                img_str = base64.b64encode(img_buffer.getvalue()).decode()
-                
-                st.divider()
-                st.subheader("📸 MÃ XÁC NHẬN CỦA BẠN")
-                
-                # 1. Hiển thị ảnh
-                st.image(img_buffer.getvalue(), width=300)
-
-                # 2. TẠO NÚT TẢI BẰNG HTML & JAVASCRIPT (Vượt rào cản Mobile)
-                # Cách này giúp điện thoại nhận lệnh tải ngay tại trình duyệt
-                file_name = f"Ma_QR_{new_id}.png"
-                html_button = f"""
-                    <a href="data:image/png;base64,{img_str}" download="{file_name}">
-                        <button style="
-                            width: 100%;
-                            background-color: #4CAF50;
-                            color: white;
-                            padding: 15px;
-                            margin: 10px 0;
-                            border: none;
-                            border-radius: 8px;
-                            cursor: pointer;
-                            font-size: 18px;
-                            font-weight: bold;
-                        ">
-                            📥 BẤM VÀO ĐÂY ĐỂ LƯU MÃ QR
-                        </button>
-                    </a>
-                """
-                st.markdown(html_button, unsafe_allow_html=True)
-                
-                st.success("✨ Đã sẵn sàng! Quý khách hãy bấm nút xanh để lưu mã, hoặc nhấn giữ vào ảnh chọn 'Lưu hình ảnh'.")
+                qr_img = qrcode.make(f"{link_goc}?action=checkout&id={new_id}")
+                buf = BytesIO()
+                qr_img.save(buf, format="PNG")
+                st.image(buf.getvalue(), caption="Quét mã này khi ra về", width=300)
         else:
             st.error("Vui lòng nhập đủ tên và SĐT!")
 
+# --- PHẦN DÀNH CHO BẢO VỆ (Giữ nguyên logic cũ, chỉ nâng cấp xuất file) ---
+# ... (Phần trên là code đăng ký của khách, em giữ nguyên) ...
 
-
-# --- PHẦN DÀNH CHO QUẢN TRỊ (BẢO VỆ) - 
+# --- PHẦN DÀNH CHO QUẢN TRỊ (BẢO VỆ) - BẢN TOÀN NĂNG ---
 else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
     password = st.text_input("Nhập mật khẩu quản lý", type="password")
@@ -252,12 +177,3 @@ else:
             
     elif password != "":
         st.error("Mật khẩu không chính xác!")
-
-
-
-
-
-
-
-
-
