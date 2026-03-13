@@ -16,7 +16,7 @@ if not os.path.exists(FILE_NAME):
 
 st.set_page_config(page_title="Hệ thống QR Khách", layout="centered")
 
-# --- PHẦN XỬ LÝ CHECK-OUT QUA QR  ---
+
 # --- ĐOẠN XỬ LÝ KHI KHÁCH QUÉT QR RA VỀ ---
 params = st.query_params
 if "action" in params and params["action"] == "checkout":
@@ -61,7 +61,7 @@ if "action" in params and params["action"] == "checkout":
             else:
                 st.error("❌ Mã định danh không hợp lệ hoặc không tồn tại trong hệ thống.")
     
-    # Nút quay lại trang chủ (nếu cần)
+    # Nút quay lại trang chủ 
     if st.button("Quay lại trang đăng ký"):
         st.query_params.clear()
         st.rerun()
@@ -97,37 +97,52 @@ if user_role == "Khách hàng":
                 df_curr = pd.concat([df_curr, pd.DataFrame([new_row])], ignore_index=True)
                 df_curr.to_excel(FILE_NAME, index=False)
                 
-               # --- PHẦN TẠO QR SIÊU TƯƠNG THÍCH MOBILE ---
+              # --- PHẦN TẠO QR VÀ NÚT TẢI SIÊU CẤP (100% MOBILE OK) ---
+                import base64
+
                 link_goc = "https://he-thong-quan-ly-khach-ra-vao.streamlit.app/" 
                 qr_content = f"{link_goc}?action=checkout&id={new_id}"
                 
-                # Tạo QR
                 qr = qrcode.QRCode(version=3, box_size=15, border=4)
                 qr.add_data(qr_content)
                 qr.make(fit=True)
                 img = qr.make_image(fill_color="black", back_color="white")
 
-                # Dùng BytesIO với con trỏ được kiểm soát chặt chẽ
+                # Chuyển ảnh thành chuỗi Base64 để nhúng thẳng vào HTML
                 img_buffer = BytesIO()
                 img.save(img_buffer, format="PNG")
-                img_data = img_buffer.getvalue() # Lấy dữ liệu ra biến riêng
-
+                img_str = base64.b64encode(img_buffer.getvalue()).decode()
+                
                 st.divider()
                 st.subheader("📸 MÃ XÁC NHẬN CỦA BẠN")
                 
-                # Hiển thị ảnh
-                st.image(img_data, width=300)
+                # 1. Hiển thị ảnh
+                st.image(img_buffer.getvalue(), width=300)
 
-                # NÚT TẢI (Sử dụng data đã lấy sẵn để điện thoại không bị delay)
-                st.download_button(
-                    label="📥 BẤM VÀO ĐÂY ĐỂ LƯU MÃ QR",
-                    data=img_data,
-                    file_name=f"Ma_QR_{new_id}.png",
-                    mime="image/png",
-                    use_container_width=True # Làm nút to ra cho dễ bấm trên điện thoại
-                )
+                # 2. TẠO NÚT TẢI BẰNG HTML & JAVASCRIPT (Vượt rào cản Mobile)
+                # Cách này giúp điện thoại nhận lệnh tải ngay tại trình duyệt
+                file_name = f"Ma_QR_{new_id}.png"
+                html_button = f"""
+                    <a href="data:image/png;base64,{img_str}" download="{file_name}">
+                        <button style="
+                            width: 100%;
+                            background-color: #4CAF50;
+                            color: white;
+                            padding: 15px;
+                            margin: 10px 0;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 18px;
+                            font-weight: bold;
+                        ">
+                            📥 BẤM VÀO ĐÂY ĐỂ LƯU MÃ QR
+                        </button>
+                    </a>
+                """
+                st.markdown(html_button, unsafe_allow_html=True)
                 
-                st.success("✨ Đã sẵn sàng! Nếu bấm nút tải không được, bạn hãy nhấn giữ vào hình ảnh rồi chọn 'Lưu ảnh' nhé!")
+                st.success("✨ Đã sẵn sàng! Quý khách hãy bấm nút xanh để lưu mã, hoặc nhấn giữ vào ảnh chọn 'Lưu hình ảnh'.")
         else:
             st.error("Vui lòng nhập đủ tên và SĐT!")
 
@@ -237,6 +252,7 @@ else:
             
     elif password != "":
         st.error("Mật khẩu không chính xác!")
+
 
 
 
