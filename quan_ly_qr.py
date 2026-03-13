@@ -89,7 +89,7 @@ else:
 
         st.divider()
 
-        # >>> EM DÁN ĐOẠN "DƯỚI" VÀO ĐÂY <<<
+     
         st.subheader("📝 Chuẩn bị file báo cáo")
         
         from openpyxl.styles import Alignment, Border, Side, Font, PatternFill
@@ -151,5 +151,6 @@ else:
             
     elif password != "":
         st.error("Sai mật khẩu rồi em!")
+
 
 
