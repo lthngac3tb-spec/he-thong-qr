@@ -44,9 +44,10 @@ if "action" in params and params["action"] == "checkout":
             # Tạo một khung thông báo lớn và trang trọng
             st.markdown(f"""
                 <div style="background-color: #f0f2f6; padding: 30px; border-radius: 15px; border-left: 10px solid #00a010; margin-top: 20px;">
-                    <h2 style="color: #008000; text-align: center;">🙏 CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
+                     <h2 style="color: #008000; text-align: center;">THPT THÁC BÀ</h2>
+                    <h2 style="color: #008000; text-align: center;">CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
                     <h3 style="color: #444; text-align: center;">HẸN GẶP LẠI!</h3>
-                    <p style="text-align: center; font-style: italic;">Hệ thống đã ghi nhận giờ ra về của bạn vào lúc: {datetime.now().strftime("%H:%M")}</p>
+                    <p style="text-align: center; font-style: italic;">Bạn ra về lúc: {datetime.now().strftime("%H:%M")}</p>
                 </div>
             """, unsafe_allow_html=True)
             
@@ -54,7 +55,7 @@ if "action" in params and params["action"] == "checkout":
             st.balloons() 
             
         else:
-            # Kiểm tra xem có phải đã báo ra rồi không
+            # Kiểm tra 
             already_out = (df['ID'].astype(str) == target_id) & (df['GioRa'].notna())
             if already_out.any():
                 st.info("💡 Bạn đã thực hiện xác nhận ra về trước đó rồi. Chúc bạn một ngày tốt lành!")
@@ -97,7 +98,7 @@ if user_role == "Khách hàng":
                 df_curr = pd.concat([df_curr, pd.DataFrame([new_row])], ignore_index=True)
                 df_curr.to_excel(FILE_NAME, index=False)
                 
-                # Tạo QR (Thay link của em vào đây nhé)
+                # Tạo QR
                 link_goc = "https://he-thong-quan-ly-khach-ra-vao.streamlit.app/" 
                 qr_img = qrcode.make(f"{link_goc}?action=checkout&id={new_id}")
                 buf = BytesIO()
@@ -106,10 +107,7 @@ if user_role == "Khách hàng":
         else:
             st.error("Vui lòng nhập đủ tên và SĐT!")
 
-# --- PHẦN DÀNH CHO BẢO VỆ (Giữ nguyên logic cũ, chỉ nâng cấp xuất file) ---
-# ... (Phần trên là code đăng ký của khách, em giữ nguyên) ...
-
-# --- PHẦN DÀNH CHO QUẢN TRỊ (BẢO VỆ) - BẢN TOÀN NĂNG ---
+# --- PHẦN DÀNH CHO BẢO VỆ  ---
 else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
     password = st.text_input("Nhập mật khẩu quản lý", type="password")
@@ -137,7 +135,7 @@ else:
             # Lọc khách đã có Giờ Ra
             khach_ve = df[df['GioRa'].notna() & (df['GioRa'] != "")]
             if not khach_ve.empty:
-                # Hiện danh sách đảo ngược (người về mới nhất lên đầu)
+                # Hiện danh sách đảo ngược 
                 st.dataframe(khach_ve.iloc[::-1], use_container_width=True)
             else:
                 st.info("Chưa có khách nào báo ra về.")
@@ -153,7 +151,7 @@ else:
             import io
 
             # Nút bấm để chuẩn bị file (Giúp Mobile chạy ổn định)
-            if st.button("📊 Chuẩn bị file Excel (Bản đẹp)"):
+            if st.button("📊 Chuẩn bị file Excel"):
                 ngay_hien_tai = datetime.now().strftime("%d_%m_%Y")
                 buffer = io.BytesIO()
                 wb = Workbook()
