@@ -44,7 +44,8 @@ if "action" in params and params["action"] == "checkout":
             # Tạo một khung thông báo lớn và trang trọng
             st.markdown(f"""
                 <div style="background-color: #f0f2f6; padding: 30px; border-radius: 15px; border-left: 10px solid #00a010; margin-top: 20px;">
-                     <h2 style="color: #008000; text-align: center;">THPT THÁC BÀ</h2>
+                  
+                    <h2 style="color: #008000; text-align: center;">THPT THÁC BÀ</h2>
                     <h2 style="color: #008000; text-align: center;">CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
                     <h3 style="color: #444; text-align: center;">HẸN GẶP LẠI!</h3>
                     <p style="text-align: center; font-style: italic;">Bạn ra về lúc: {datetime.now().strftime("%H:%M")}</p>
