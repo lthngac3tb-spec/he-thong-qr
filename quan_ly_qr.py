@@ -65,7 +65,6 @@ if "action" in params and params["action"] == "checkout":
                     </div>
                 </div>
             """, unsafe_allow_html=True)
-            
             st.success(f"✅ Đã xác nhận ra về thành công!")
             # Bắn pháo hoa chúc mừng khách ra về vui vẻ
             st.balloons() 
