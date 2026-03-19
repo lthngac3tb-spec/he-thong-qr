@@ -30,19 +30,18 @@ if "action" in params and params["action"] == "checkout":
         # Kiểm tra ID và trạng thái
         mask = (df['ID'].astype(str) == target_id) & (df['GioRa'].isna() | (df['GioRa'] == ""))
         
-       if mask.any():
-            # 1. Lấy tên khách và ghi giờ ra (Dùng giờ VN đã sửa ở trên)
-            ten_khach = df.loc[mask, 'HoTen'].values[0]
-            from datetime import datetime, timedelta
-            gio_ra_vn = (datetime.utcnow() + timedelta(hours=7))
-            
-            df.loc[mask, 'GioRa'] = gio_ra_vn.strftime("%H:%M %d/%m/%Y")
-            df.to_excel(FILE_NAME, index=False)
+    if mask.any():
+    # 1. Lấy tên khách và ghi giờ ra (Dùng giờ VN đã sửa ở trên)
+        ten_khach = df.loc[mask, 'HoTen'].values[0]
+        from datetime import datetime, timedelta
+        gio_ra_vn = (datetime.utcnow() + timedelta(hours=7))
+        df.loc[mask, 'GioRa'] = gio_ra_vn.strftime("%H:%M %d/%m/%Y")
+        df.to_excel(FILE_NAME, index=False)
             
             # 2. HIỂN THỊ LỜI CHÀO (Dùng HTML để trang trí)
-            st.balloons() # Bắn pháo hoa ngay lập tức
+        st.balloons() # Bắn pháo hoa ngay lập tức
             
-            st.markdown(f"""
+        st.markdown(f"""
                 <div style="
                     background-color: #ffffff; 
                     padding: 30px; 
