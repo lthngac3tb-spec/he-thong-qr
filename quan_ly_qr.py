@@ -17,7 +17,7 @@ if not os.path.exists(FILE_NAME):
 st.set_page_config(page_title="Hệ thống QR Khách", layout="centered")
 
 # --- PHẦN XỬ LÝ CHECK-OUT QUA QR  ---
-# --- ĐOẠN XỬ LÝ KHI KHÁCH QUÉT QR RA VỀ ---
+
 params = st.query_params
 if "action" in params and params["action"] == "checkout":
     target_id = params.get("id")
@@ -34,8 +34,12 @@ if "action" in params and params["action"] == "checkout":
             # Lấy tên khách để chào cho thân thiện
             ten_khach = df.loc[mask, 'HoTen'].values[0]
             
-            # Ghi giờ ra
-            df.loc[mask, 'GioRa'] = datetime.now().strftime("%H:%M %d/%m/%Y")
+           # 1. Khai báo múi giờ Việt Nam (GMT+7)
+            from datetime import datetime, timedelta
+            gio_vn = datetime.utcnow() + timedelta(hours=7)
+            
+            # 2. Ghi giờ ra chuẩn Việt Nam vào DataFrame
+            df.loc[mask, 'GioRa'] = gio_vn.strftime("%H:%M %d/%m/%Y")
             df.to_excel(FILE_NAME, index=False)
             
             # --- HIỂN THỊ THÔNG BÁO CẢM ƠN SIÊU ĐẸP ---
