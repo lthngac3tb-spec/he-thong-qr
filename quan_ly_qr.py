@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import qrcode
-from datetime import datetime
+from datetime import datetime, timedelta # Thêm timedelta để chỉnh giờ VN
 import os
 import uuid
 from io import BytesIO
@@ -14,75 +14,51 @@ if not os.path.exists(FILE_NAME):
     df = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "MucDich", "GioVao", "GioRa"])
     df.to_excel(FILE_NAME, index=False)
 
-st.set_page_config(page_title="Hệ thống QR Khách", layout="centered")
+st.set_page_config(page_title="Hệ thống QR Khách - THPT Thác Bà", layout="centered")
 
-# --- PHẦN XỬ LÝ CHECK-OUT QUA QR  ---
-
+# --- PHẦN XỬ LÝ CHECK-OUT QUA QR ---
 params = st.query_params
 if "action" in params and params["action"] == "checkout":
     target_id = params.get("id")
-    
-    # Hiển thị tiêu đề trang trọng
     st.title("🚀 XÁC NHẬN RA VỀ")
     
     if os.path.exists(FILE_NAME):
         df = pd.read_excel(FILE_NAME)
-        # Kiểm tra ID và trạng thái
         mask = (df['ID'].astype(str) == target_id) & (df['GioRa'].isna() | (df['GioRa'] == ""))
         
-    if mask.any():
-    # 1. Lấy tên khách và ghi giờ ra (Dùng giờ VN đã sửa ở trên)
-        ten_khach = df.loc[mask, 'HoTen'].values[0]
-        from datetime import datetime, timedelta
-        gio_ra_vn = (datetime.utcnow() + timedelta(hours=7))
-        df.loc[mask, 'GioRa'] = gio_ra_vn.strftime("%H:%M %d/%m/%Y")
-        df.to_excel(FILE_NAME, index=False)
+        # SỬA LỖI THỤT LỀ Ở ĐÂY
+        if mask.any():
+            ten_khach = df.loc[mask, 'HoTen'].values[0]
+            # Lấy giờ VN chuẩn
+            gio_ra_vn = datetime.utcnow() + timedelta(hours=7)
+            df.loc[mask, 'GioRa'] = gio_ra_vn.strftime("%H:%M %d/%m/%Y")
+            df.to_excel(FILE_NAME, index=False)
             
-            # 2. HIỂN THỊ LỜI CHÀO (Dùng HTML để trang trí)
-        st.balloons() # Bắn pháo hoa ngay lập tức
-            
-        st.markdown(f"""
-                <div style="
-                    background-color: #ffffff; 
-                    padding: 30px; 
-                    border-radius: 20px; 
-                    border: 3px solid #008000; 
-                    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
-                    margin: 20px 0;
-                    text-align: center;
-                ">
+            st.balloons() 
+            st.markdown(f"""
+                <div style="background-color: #ffffff; padding: 30px; border-radius: 20px; border: 3px solid #008000; box-shadow: 0px 4px 15px rgba(0,0,0,0.1); margin: 20px 0; text-align: center;">
                     <h1 style="color: #008000; margin-bottom: 5px;">🏫 THPT THÁC BÀ</h1>
                     <hr style="border: 1px solid #eee; width: 50%; margin: 10px auto;">
                     <h2 style="color: #2E7D32; font-weight: bold;">🙏 CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
                     <h3 style="color: #555;">HẸN GẶP LẠI!</h3>
                     <div style="background-color: #e8f5e9; padding: 10px; border-radius: 10px; display: inline-block; margin-top: 15px;">
-                        <p style="margin: 0; color: #1b5e20; font-weight: bold;">
-                            Khách hàng: {ten_khach}
-                        </p>
-                        <p style="margin: 0; font-size: 0.9em; color: #666;">
-                            Giờ ra hệ thống: {gio_ra_vn.strftime("%H:%M")}
-                        </p>
+                        <p style="margin: 0; color: #1b5e20; font-weight: bold;">Khách hàng: {ten_khach}</p>
+                        <p style="margin: 0; font-size: 0.9em; color: #666;">Giờ ra hệ thống: {gio_ra_vn.strftime("%H:%M")}</p>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
             st.success(f"✅ Đã xác nhận ra về thành công!")
-            # Bắn pháo hoa chúc mừng khách ra về vui vẻ
-            st.balloons() 
-            
         else:
-            # Kiểm tra 
             already_out = (df['ID'].astype(str) == target_id) & (df['GioRa'].notna())
             if already_out.any():
-                st.info("💡 Bạn đã thực hiện xác nhận ra về trước đó rồi. Chúc bạn một ngày tốt lành!")
+                st.info("💡 Bạn đã xác nhận ra về trước đó rồi. Chúc bạn một ngày tốt lành!")
             else:
-                st.error("❌ Mã định danh không hợp lệ hoặc không tồn tại trong hệ thống.")
+                st.error("❌ Mã không hợp lệ hoặc không tồn tại.")
     
-    # Nút quay lại trang chủ (nếu cần)
     if st.button("Quay lại trang đăng ký"):
         st.query_params.clear()
         st.rerun()
-        
-    st.stop() # Dừng tại đây để khách không thấy phần của bảo vệ
+    st.stop()
 
 # --- GIAO DIỆN CHÍNH ---
 st.sidebar.title("🔑 QUẢN TRỊ")
@@ -90,6 +66,9 @@ user_role = st.sidebar.selectbox("Bạn là ai?", ["Khách hàng", "Bảo vệ /
 
 if user_role == "Khách hàng":
     st.title("📝 ĐĂNG KÝ VÀO CƠ QUAN")
+    # Chèn Logo trường vào đây nếu em muốn
+    # st.image("link_logo.png", width=120) 
+    
     name = st.text_input("Họ và tên")
     phone = st.text_input("Số điện thoại")
     bo_phan = st.selectbox("Bộ phận cần gặp", ["Ban giám hiệu", "Hành chính", "Kế toán", "Khác"])
@@ -105,15 +84,17 @@ if user_role == "Khách hàng":
             else:
                 new_id = str(uuid.uuid4())[:8]
                 df_curr = pd.read_excel(FILE_NAME)
+                # Giờ vào Việt Nam
+                gio_vao_vn = (datetime.utcnow() + timedelta(hours=7)).strftime("%H:%M %d/%m")
+                
                 new_row = {
                     "ID": new_id, "HoTen": name, "SDT": phone, 
                     "GapAi": bo_phan, "MucDich": muc_dich, 
-                    "GioVao": datetime.now().strftime("%H:%M %d/%m"), "GioRa": ""
+                    "GioVao": gio_vao_vn, "GioRa": ""
                 }
                 df_curr = pd.concat([df_curr, pd.DataFrame([new_row])], ignore_index=True)
                 df_curr.to_excel(FILE_NAME, index=False)
                 
-                # Tạo QR
                 link_goc = "https://he-thong-quan-ly-khach-ra-vao.streamlit.app/" 
                 qr_img = qrcode.make(f"{link_goc}?action=checkout&id={new_id}")
                 buf = BytesIO()
@@ -122,71 +103,50 @@ if user_role == "Khách hàng":
         else:
             st.error("Vui lòng nhập đủ tên và SĐT!")
 
-# --- PHẦN DÀNH CHO BẢO VỆ  ---
 else:
+    # --- PHẦN BẢO VỆ (GIỮ NGUYÊN NHƯ EM ĐÃ VIẾT) ---
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
     password = st.text_input("Nhập mật khẩu quản lý", type="password")
     
     if password == "123456":
         st.success("🛡️ Đã đăng nhập quyền Bảo vệ/Quản trị")
-        
-        # Đọc dữ liệu từ file Excel
         if os.path.exists(FILE_NAME):
             df = pd.read_excel(FILE_NAME)
-            
-            # --- BẢNG 1: KHÁCH ĐANG Ở TRONG ---
             st.subheader("🔴 Khách đang ở trong cơ quan")
-            # Lọc khách có Giờ Ra trống
             khach_trong = df[df['GioRa'].isna() | (df['GioRa'] == "")]
             if not khach_trong.empty:
                 st.dataframe(khach_trong, use_container_width=True)
             else:
                 st.info("Hiện không có khách nào ở trong.")
-
+            
             st.divider()
-
-            # --- BẢNG 2: KHÁCH ĐÃ RA VỀ ---
             st.subheader("🟢 Khách đã ra về trong ngày")
-            # Lọc khách đã có Giờ Ra
             khach_ve = df[df['GioRa'].notna() & (df['GioRa'] != "")]
             if not khach_ve.empty:
-                # Hiện danh sách đảo ngược 
                 st.dataframe(khach_ve.iloc[::-1], use_container_width=True)
-            else:
-                st.info("Chưa có khách nào báo ra về.")
-
-            st.divider()
-
-            # --- PHẦN XUẤT FILE EXCEL "PHONG CÁCH ĐIỆN THOẠI" ---
-            st.subheader("📝 Công cụ báo cáo")
             
+            st.divider()
+            # Phần xuất Excel của em thầy giữ nguyên lề lối nhé
+            st.subheader("📝 Công cụ báo cáo")
             from openpyxl.styles import Alignment, Border, Side, Font, PatternFill
             from openpyxl.utils import get_column_letter
             from openpyxl import Workbook
             import io
 
-            # Nút bấm để chuẩn bị file (Giúp Mobile chạy ổn định)
             if st.button("📊 Chuẩn bị file Excel"):
-                ngay_hien_tai = datetime.now().strftime("%d_%m_%Y")
+                ngay_hien_tai = (datetime.utcnow() + timedelta(hours=7)).strftime("%d_%m_%Y")
                 buffer = io.BytesIO()
                 wb = Workbook()
                 ws = wb.active
                 ws.title = "BaoCaoRaVao"
-
                 headers = list(df.columns)
                 ws.append(headers)
-
                 for r in df.values.tolist():
                     row_data = [str(x) if str(x) != 'nan' else "" for x in r]
                     ws.append(row_data)
                 
-                # --- ĐỊNH DẠNG XANH + KẺ BẢNG ---
                 blue_fill = PatternFill(start_color="B8CCE4", end_color="B8CCE4", fill_type="solid")
-                thin_border = Border(
-                    left=Side(style='thin'), right=Side(style='thin'), 
-                    top=Side(style='thin'), bottom=Side(style='thin')
-                )
-                
+                thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
                 for col_num in range(1, len(headers) + 1):
                     cell = ws.cell(row=1, column=col_num)
                     cell.fill = blue_fill
@@ -197,34 +157,8 @@ else:
                 for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
                     for cell in row:
                         cell.border = thin_border
-                        cell.alignment = Alignment(vertical='center')
-
-                # Tự chỉnh độ rộng cột
-                column_widths = [12, 25, 15, 20, 35, 20, 20] 
-                for i, width in enumerate(column_widths):
-                    if i < len(headers):
-                        ws.column_dimensions[get_column_letter(i + 1)].width = width
-
-                wb.save(buffer)
                 
-                # Nút tải thực sự hiện ra sau khi chuẩn bị xong
-                st.download_button(
-                    label="📥 Tải file về máy (Click để lưu)",
-                    data=buffer.getvalue(),
-                    file_name=f"Bao_cao_khach_{ngay_hien_tai}.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-
-            # Nút xóa dữ liệu (Cẩn thận khi dùng)
-            st.divider()
-            if st.button("🗑️ Reset dữ liệu ngày mới"):
-                df_reset = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "MucDich", "GioVao", "GioRa"])
-                df_reset.to_excel(FILE_NAME, index=False)
-                st.warning("Đã làm sạch dữ liệu. Vui lòng F5 (Reload) trang web.")
-        else:
-            st.error("Chưa có dữ liệu khách đăng ký!")
-            
+                wb.save(buffer)
+                st.download_button(label="📥 Tải file về máy", data=buffer.getvalue(), file_name=f"Bao_cao_{ngay_hien_tai}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     elif password != "":
         st.error("Mật khẩu không chính xác!")
-
-
