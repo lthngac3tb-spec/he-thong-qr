@@ -30,32 +30,44 @@ if "action" in params and params["action"] == "checkout":
         # Kiểm tra ID và trạng thái
         mask = (df['ID'].astype(str) == target_id) & (df['GioRa'].isna() | (df['GioRa'] == ""))
         
-        if mask.any():
-            # Lấy tên khách để chào cho thân thiện
+       if mask.any():
+            # 1. Lấy tên khách và ghi giờ ra (Dùng giờ VN đã sửa ở trên)
             ten_khach = df.loc[mask, 'HoTen'].values[0]
-            
-           # 1. Khai báo múi giờ Việt Nam (GMT+7)
             from datetime import datetime, timedelta
-            gio_vn = datetime.utcnow() + timedelta(hours=7)
+            gio_ra_vn = (datetime.utcnow() + timedelta(hours=7))
             
-            # 2. Ghi giờ ra chuẩn Việt Nam vào DataFrame
-            df.loc[mask, 'GioRa'] = gio_vn.strftime("%H:%M %d/%m/%Y")
+            df.loc[mask, 'GioRa'] = gio_ra_vn.strftime("%H:%M %d/%m/%Y")
             df.to_excel(FILE_NAME, index=False)
             
-            # --- HIỂN THỊ THÔNG BÁO CẢM ƠN SIÊU ĐẸP ---
-            st.success(f"✅ Xác nhận thành công cho khách: **{ten_khach}**")
+            # 2. HIỂN THỊ LỜI CHÀO (Dùng HTML để trang trí)
+            st.balloons() # Bắn pháo hoa ngay lập tức
             
-            # Tạo một khung thông báo lớn và trang trọng
             st.markdown(f"""
-                <div style="background-color: #f0f2f6; padding: 30px; border-radius: 15px; border-left: 10px solid #00a010; margin-top: 20px;">
-                  
-                    <h2 style="color: #008000; text-align: center;">THPT THÁC BÀ</h2>
-                    <h2 style="color: #008000; text-align: center;">CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
-                    <h3 style="color: #444; text-align: center;">HẸN GẶP LẠI!</h3>
-                    <p style="text-align: center; font-style: italic;">Bạn ra về lúc: {datetime.now().strftime("%H:%M")}</p>
+                <div style="
+                    background-color: #ffffff; 
+                    padding: 30px; 
+                    border-radius: 20px; 
+                    border: 3px solid #008000; 
+                    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+                    margin: 20px 0;
+                    text-align: center;
+                ">
+                    <h1 style="color: #008000; margin-bottom: 5px;">🏫 THPT THÁC BÀ</h1>
+                    <hr style="border: 1px solid #eee; width: 50%; margin: 10px auto;">
+                    <h2 style="color: #2E7D32; font-weight: bold;">🙏 CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
+                    <h3 style="color: #555;">HẸN GẶP LẠI!</h3>
+                    <div style="background-color: #e8f5e9; padding: 10px; border-radius: 10px; display: inline-block; margin-top: 15px;">
+                        <p style="margin: 0; color: #1b5e20; font-weight: bold;">
+                            Khách hàng: {ten_khach}
+                        </p>
+                        <p style="margin: 0; font-size: 0.9em; color: #666;">
+                            Giờ ra hệ thống: {gio_ra_vn.strftime("%H:%M")}
+                        </p>
+                    </div>
                 </div>
             """, unsafe_allow_html=True)
             
+            st.success(f"✅ Đã xác nhận ra về thành công!")
             # Bắn pháo hoa chúc mừng khách ra về vui vẻ
             st.balloons() 
             
