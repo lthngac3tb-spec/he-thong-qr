@@ -169,6 +169,7 @@ else:
                 
                 wb.save(buffer)
                 st.download_button(label="📥 Tải file về máy", data=buffer.getvalue(), file_name=f"Bao_cao_{ngay_hien_tai}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    
     elif password != "":
         # Chỉ báo lỗi khi độ dài mật khẩu đã đủ nhưng sai (để tránh báo lỗi ngay từ ký tự đầu tiên)
         if len(password) >= 6:
