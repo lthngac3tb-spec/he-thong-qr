@@ -139,20 +139,28 @@ else:
             with col1:
                 # Nút Xuất Excel (Tên file theo ngày VN)
                 if st.button("📊 Chuẩn bị file Excel"):
-                    from datetime import datetime, timedelta
-                    import io
-                    from openpyxl import Workbook
-                    
-                    ngay_hien_tai = (datetime.utcnow() + timedelta(hours=7)).strftime("%d_%m_%Y")
-                    buffer = io.BytesIO()
-                    df.to_excel(buffer, index=False) # Hoặc dùng đoạn định dạng màu của em ở trên
-                    
-                    st.download_button(
-                        label="📥 Tải file về máy",
-                        data=buffer.getvalue(),
-                        file_name=f"Bao_cao_{ngay_hien_tai}.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
+                from datetime import datetime, timedelta
+                import io
+                import base64 # Thêm thư viện này để mã hóa file
+                
+                # 1. Lấy ngày hiện tại VN
+                ngay_hien_tai = (datetime.utcnow() + timedelta(hours=7)).strftime("%d_%m_%Y")
+                file_name = f"Bao_cao_{ngay_hien_tai}.xlsx"
+                
+                # 2. Tạo file Excel vào bộ nhớ đệm
+                buffer = io.BytesIO()
+                with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                    df.to_excel(writer, index=False, sheet_name='Sheet1')
+                
+                excel_data = buffer.getvalue()
+                
+                # 3. CHIÊU THỨC CHO MOBILE: Tạo link tải giả lập
+                b64 = base64.b64encode(excel_data).decode()
+                href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="{file_name}" style="text-decoration: none;"><button style="width: 100%; background-color: #28a745; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer;">📥 BẤM VÀO ĐÂY ĐỂ TẢI VỀ ĐIỆN THOẠI</button></a>'
+                
+                # Hiển thị nút tải kiểu HTML (Mobile cực thích cái này)
+                st.markdown(href, unsafe_allow_html=True)
+                st.info("👆 Nếu bấm nút trên mà không thấy gì, hãy chọn 'Mở bằng trình duyệt' (Chrome/Safari) từ dấu 3 chấm của Zalo nhé!")
 
             with col2:
                 # NÚT RESET DỮ LIỆU NGÀY MỚI
