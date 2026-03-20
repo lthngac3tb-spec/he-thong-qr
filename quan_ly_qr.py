@@ -11,7 +11,7 @@ FILE_NAME = "danh_sach_khach.xlsx"
 
 # 1. KHỞI TẠO FILE NẾU CHƯA CÓ
 if not os.path.exists(FILE_NAME):
-    df = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "MucDich", "GioVao", "GioRa"])
+    df = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "MucDich/Lop", "GioVao", "GioRa"])
     df.to_excel(FILE_NAME, index=False)
 
 st.set_page_config(page_title="Hệ thống QR Khách - THPT Thác Bà", layout="centered")
