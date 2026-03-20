@@ -144,7 +144,7 @@ else:
                     import base64 # Thêm thư viện này để mã hóa file
                 
                 # 1. Lấy ngày hiện tại VN
-                ngay_hien_tai = (datetime.utcnow() + timedelta(hours=7)).strftime("%d_%m_%Y")
+                    ngay_hien_tai = (datetime.utcnow() + timedelta(hours=7)).strftime("%d_%m_%Y")
                     file_name = f"Bao_cao_{ngay_hien_tai}.xlsx"
                 
                 # 2. Tạo file Excel vào bộ nhớ đệm
