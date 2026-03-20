@@ -110,18 +110,15 @@ else:
     # Sử dụng key để Streamlit theo dõi thay đổi ngay lập tức
     password = st.text_input("Nhập mật khẩu quản lý", type="password", key="admin_password")
     
-    # Kiểm tra mật khẩu trực tiếp (Streamlit sẽ tự chạy lại mỗi khi em gõ thêm 1 ký tự)
+    # Kiểm tra mật khẩu trực tiếp (Streamlit sẽ tự chạy lại mỗi khi gõ thêm 1 ký tự)
     if password == "123456":
-        st.success("🔓 Xác thực thành công! Đang mở bảng điều khiển...")
+        st.success("🔓 Xác thực thành công! ...")
+        login_placeholder.empty()
         
         # --- TOÀN BỘ CODE QUẢN TRỊ NẰM TRONG ĐÂY ---
         if os.path.exists(FILE_NAME):
             df = pd.read_excel(FILE_NAME)
-            
-         
-            
-  
-            
+                  
         if os.path.exists(FILE_NAME):
             df = pd.read_excel(FILE_NAME)
             st.subheader("🔴 Khách đang ở trong cơ quan")
