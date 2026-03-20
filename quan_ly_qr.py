@@ -26,7 +26,6 @@ if "action" in params and params["action"] == "checkout":
         df = pd.read_excel(FILE_NAME)
         mask = (df['ID'].astype(str) == target_id) & (df['GioRa'].isna() | (df['GioRa'] == ""))
         
-        # SỬA LỖI THỤT LỀ Ở ĐÂY
         if mask.any():
             ten_khach = df.loc[mask, 'HoTen'].values[0]
             # Lấy giờ VN chuẩn
@@ -39,7 +38,7 @@ if "action" in params and params["action"] == "checkout":
                 <div style="background-color: #ffffff; padding: 30px; border-radius: 20px; border: 3px solid #008000; box-shadow: 0px 4px 15px rgba(0,0,0,0.1); margin: 20px 0; text-align: center;">
                     <h1 style="color: #008000; margin-bottom: 5px;">🏫 THPT THÁC BÀ</h1>
                     <hr style="border: 1px solid #eee; width: 50%; margin: 10px auto;">
-                    <h2 style="color: #2E7D32; font-weight: bold;">🙏 CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
+                    <h2 style="color: #2E7D32; font-weight: bold;"> CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
                     <h3 style="color: #555;">HẸN GẶP LẠI!</h3>
                     <div style="background-color: #e8f5e9; padding: 10px; border-radius: 10px; display: inline-block; margin-top: 15px;">
                         <p style="margin: 0; color: #1b5e20; font-weight: bold;">Khách hàng: {ten_khach}</p>
