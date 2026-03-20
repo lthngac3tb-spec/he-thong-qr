@@ -103,9 +103,7 @@ if user_role == "Khách hàng":
         else:
             st.error("Vui lòng nhập đủ tên và SĐT!")
 
-else:
-    # --- PHẦN BẢO VỆ (GIỮ NGUYÊN NHƯ EM ĐÃ VIẾT) ---
-   # --- PHẦN DÀNH CHO BẢO VỆ ---
+
 else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
     
