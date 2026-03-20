@@ -71,12 +71,13 @@ if user_role == "Khách hàng":
     
     name = st.text_input("Họ và tên")
     phone = st.text_input("Số điện thoại")
-    bo_phan = st.selectbox("Bộ phận cần gặp", ["Ban giám hiệu", "Hành chính", "Kế toán", "Khác"])
+    bo_phan = st.selectbox("Bộ phận cần gặp", ["Ban giám hiệu", "Hành chính", "GVCN", "Khác"])
     
     muc_dich = ""
     if bo_phan == "Hành chính":
         muc_dich = st.text_area("🎯 Mục đích công việc (Bắt buộc):")
-    
+    if bo_phan == "GVCN":
+        muc_dich = st.text_area("Lớp:")
     if st.button("Lấy mã QR"):
         if name and phone:
             if bo_phan == "Hành chính" and not muc_dich:
