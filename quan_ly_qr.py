@@ -105,11 +105,25 @@ if user_role == "Khách hàng":
 
 else:
     # --- PHẦN BẢO VỆ (GIỮ NGUYÊN NHƯ EM ĐÃ VIẾT) ---
+   # --- PHẦN DÀNH CHO BẢO VỆ ---
+else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
-    password = st.text_input("Nhập mật khẩu quản lý", type="password")
     
+    # Sử dụng key để Streamlit theo dõi thay đổi ngay lập tức
+    password = st.text_input("Nhập mật khẩu quản lý", type="password", key="admin_password")
+    
+    # Kiểm tra mật khẩu trực tiếp (Streamlit sẽ tự chạy lại mỗi khi em gõ thêm 1 ký tự)
     if password == "123456":
-        st.success("🛡️ Đã đăng nhập quyền Bảo vệ/Quản trị")
+        st.success("🔓 Xác thực thành công! Đang mở bảng điều khiển...")
+        
+        # --- TOÀN BỘ CODE QUẢN TRỊ NẰM TRONG ĐÂY ---
+        if os.path.exists(FILE_NAME):
+            df = pd.read_excel(FILE_NAME)
+            
+         
+            
+  
+            
         if os.path.exists(FILE_NAME):
             df = pd.read_excel(FILE_NAME)
             st.subheader("🔴 Khách đang ở trong cơ quan")
@@ -161,4 +175,6 @@ else:
                 wb.save(buffer)
                 st.download_button(label="📥 Tải file về máy", data=buffer.getvalue(), file_name=f"Bao_cao_{ngay_hien_tai}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     elif password != "":
-        st.error("Mật khẩu không chính xác!")
+        # Chỉ báo lỗi khi độ dài mật khẩu đã đủ nhưng sai (để tránh báo lỗi ngay từ ký tự đầu tiên)
+        if len(password) >= 6:
+            st.error("❌ Mật khẩu không chính xác!")
