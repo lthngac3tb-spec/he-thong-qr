@@ -104,73 +104,70 @@ if user_role == "Khách hàng":
             st.error("Vui lòng nhập đủ tên và SĐT!")
 
 
+# --- PHẦN DÀNH CHO BẢO VỆ / ADMIN ---
 else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
-    # 1. Đặt cái hộp rỗng ở đây trước
+    
+    # 1. Tạo hộp rỗng để chứa ô nhập mật khẩu
     login_placeholder = st.empty()
-
-# 2. Gán cái ô nhập mật khẩu vào hộp đó
     password = login_placeholder.text_input("Nhập mật khẩu quản lý", type="password", key="admin_password")
+    
     if password == "123456":
+        # 2. Xóa ô mật khẩu ngay khi đúng
         login_placeholder.empty()
-        st.success("🔓 Xác thực thành công!")
-   
-        # --- TOÀN BỘ CODE QUẢN TRỊ NẰM TRONG ĐÂY ---
+        st.success("🔓 Xác thực thành công! Chào mừng cán bộ trực ban.")
+        
         if os.path.exists(FILE_NAME):
             df = pd.read_excel(FILE_NAME)
-                  
-        if os.path.exists(FILE_NAME):
-            df = pd.read_excel(FILE_NAME)
+            
+            # --- HIỂN THỊ CÁC BẢNG DỮ LIỆU ---
             st.subheader("🔴 Khách đang ở trong cơ quan")
             khach_trong = df[df['GioRa'].isna() | (df['GioRa'] == "")]
-            if not khach_trong.empty:
-                st.dataframe(khach_trong, use_container_width=True)
-            else:
-                st.info("Hiện không có khách nào ở trong.")
-            
-            st.divider()
-            st.subheader("🟢 Khách đã ra về trong ngày")
-            khach_ve = df[df['GioRa'].notna() & (df['GioRa'] != "")]
-            if not khach_ve.empty:
-                st.dataframe(khach_ve.iloc[::-1], use_container_width=True)
-            
-            st.divider()
-            # Phần xuất Excel của em thầy giữ nguyên lề lối nhé
-            st.subheader("📝 Công cụ báo cáo")
-            from openpyxl.styles import Alignment, Border, Side, Font, PatternFill
-            from openpyxl.utils import get_column_letter
-            from openpyxl import Workbook
-            import io
+            st.dataframe(khach_trong, use_container_width=True)
 
-            if st.button("📊 Chuẩn bị file Excel"):
-                ngay_hien_tai = (datetime.utcnow() + timedelta(hours=7)).strftime("%d_%m_%Y")
-                buffer = io.BytesIO()
-                wb = Workbook()
-                ws = wb.active
-                ws.title = "BaoCaoRaVao"
-                headers = list(df.columns)
-                ws.append(headers)
-                for r in df.values.tolist():
-                    row_data = [str(x) if str(x) != 'nan' else "" for x in r]
-                    ws.append(row_data)
-                
-                blue_fill = PatternFill(start_color="B8CCE4", end_color="B8CCE4", fill_type="solid")
-                thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
-                for col_num in range(1, len(headers) + 1):
-                    cell = ws.cell(row=1, column=col_num)
-                    cell.fill = blue_fill
-                    cell.font = Font(bold=True)
-                    cell.alignment = Alignment(horizontal='center', vertical='center')
-                    cell.border = thin_border
-                
-                for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
-                    for cell in row:
-                        cell.border = thin_border
-                
-                wb.save(buffer)
-                st.download_button(label="📥 Tải file về máy", data=buffer.getvalue(), file_name=f"Bao_cao_{ngay_hien_tai}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    
+            st.divider()
+            st.subheader("🟢 Khách đã ra về")
+            khach_ve = df[df['GioRa'].notna() & (df['GioRa'] != "")]
+            st.dataframe(khach_ve.iloc[::-1], use_container_width=True)
+
+            # --- CÔNG CỤ XUẤT FILE & RESET ---
+            st.divider()
+            st.subheader("⚙️ CÔNG CỤ HỆ THỐNG")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Nút Xuất Excel (Tên file theo ngày VN)
+                if st.button("📊 Chuẩn bị file Excel"):
+                    from datetime import datetime, timedelta
+                    import io
+                    from openpyxl import Workbook
+                    
+                    ngay_hien_tai = (datetime.utcnow() + timedelta(hours=7)).strftime("%d_%m_%Y")
+                    buffer = io.BytesIO()
+                    df.to_excel(buffer, index=False) # Hoặc dùng đoạn định dạng màu của em ở trên
+                    
+                    st.download_button(
+                        label="📥 Tải file về máy",
+                        data=buffer.getvalue(),
+                        file_name=f"Bao_cao_{ngay_hien_tai}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+
+            with col2:
+                # NÚT RESET DỮ LIỆU NGÀY MỚI
+                if st.button("🗑️ Reset dữ liệu ngày mới"):
+                    # Tạo bảng trống
+                    df_reset = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "MucDich", "GioVao", "GioRa"])
+                    df_reset.to_excel(FILE_NAME, index=False)
+                    
+                    st.warning("Đã xóa sạch dữ liệu. Đang làm mới hệ thống...")
+                    st.balloons()
+                    # Tự động load lại trang để bảng trắng tinh
+                    st.rerun()
+            
+            st.info("💡 Lưu ý: Hãy Tải file Excel trước khi bấm Reset để lưu trữ báo cáo nhé!")
+
     elif password != "":
-        # Chỉ báo lỗi khi độ dài mật khẩu đã đủ nhưng sai (để tránh báo lỗi ngay từ ký tự đầu tiên)
         if len(password) >= 6:
             st.error("❌ Mật khẩu không chính xác!")
