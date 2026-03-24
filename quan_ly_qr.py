@@ -136,7 +136,7 @@ else:
             
             col1, col2 = st.columns(2)
             
-           # --- Tìm đến đoạn col1 trong phần ADMIN và thay thế bằng đoạn này ---
+    
             with col1:
                 if st.button("📊 Chuẩn bị file Excel"):
                     from datetime import datetime, timedelta
@@ -192,7 +192,7 @@ else:
                     href = f'''
                     <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="{file_name}" style="text-decoration: none;">
                         <button style="width: 100%; background-color: #28a745; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer;">
-                            📥 BẤM VÀO ĐÂY ĐỂ TẢI VỀ ĐIỆN THOẠI
+                            📥 BẤM VÀO ĐÂY ĐỂ TẢI VỀ
                         </button>
                     </a>
                     '''
