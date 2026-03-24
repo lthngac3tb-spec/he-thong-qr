@@ -36,7 +36,7 @@ if "action" in params and params["action"] == "checkout":
             st.balloons() 
             st.markdown(f"""
                 <div style="background-color: #ffffff; padding: 30px; border-radius: 20px; border: 3px solid #008000; box-shadow: 0px 4px 15px rgba(0,0,0,0.1); margin: 20px 0; text-align: center;">
-                    <h2 style="color: #008000; margin-bottom: 5px;">🏫 THPT THÁC BÀ</h2>
+                    <h2 style="color: #008000; margin-bottom: 5px;font-size: 1.5rem">🏫 THPT THÁC BÀ</h2>
                     <hr style="border: 1px solid #eee; width: 50%; margin: 10px auto;">
                     <h2 style="color: #2E7D32; font-weight: bold;"> CẢM ƠN QUÝ KHÁCH ĐÃ GHÉ THĂM</h2>
                     <h3 style="color: #555;">HẸN GẶP LẠI!</h3>
