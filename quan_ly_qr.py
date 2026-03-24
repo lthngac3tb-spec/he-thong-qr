@@ -11,7 +11,7 @@ FILE_NAME = "danh_sach_khach.xlsx"
 
 # 1. KHỞI TẠO FILE NẾU CHƯA CÓ
 if not os.path.exists(FILE_NAME):
-    df = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "Mucdich", "GioVao", "GioRa"])
+    df = pd.DataFrame(columns=["ID", "HoTen", "SDT", "GapAi", "MucDich/Lop", "GioVao", "GioRa"])
     df.to_excel(FILE_NAME, index=False)
 
 st.set_page_config(page_title="Hệ thống QR Khách - THPT Thác Bà", layout="centered")
@@ -89,7 +89,7 @@ if user_role == "Khách hàng":
                 
                 new_row = {
                     "ID": new_id, "HoTen": name, "SDT": phone, 
-                    "GapAi": bo_phan, "MucDich": muc_dich, 
+                    "GapAi": bo_phan, "MucDich/Lop": muc_dich, 
                     "GioVao": gio_vao_vn, "GioRa": ""
                 }
                 df_curr = pd.concat([df_curr, pd.DataFrame([new_row])], ignore_index=True)
