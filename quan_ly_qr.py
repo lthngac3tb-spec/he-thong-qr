@@ -136,31 +136,68 @@ else:
             
             col1, col2 = st.columns(2)
             
+           # --- Tìm đến đoạn col1 trong phần ADMIN và thay thế bằng đoạn này ---
             with col1:
-                # Nút Xuất Excel (Tên file theo ngày VN)
                 if st.button("📊 Chuẩn bị file Excel"):
                     from datetime import datetime, timedelta
                     import io
-                    import base64 # Thêm thư viện này để mã hóa file
-                
-                # 1. Lấy ngày hiện tại VN
+                    import base64
+                    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+                    from openpyxl.utils import get_column_letter
+
+                    # 1. Lấy ngày hiện tại VN
                     ngay_hien_tai = (datetime.utcnow() + timedelta(hours=7)).strftime("%d_%m_%Y")
                     file_name = f"Bao_cao_{ngay_hien_tai}.xlsx"
                 
-                # 2. Tạo file Excel vào bộ nhớ đệm
+                    # 2. Tạo file Excel vào bộ nhớ đệm
                     buffer = io.BytesIO()
                     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-                        df.to_excel(writer, index=False, sheet_name='Sheet1')
-                
+                        df.to_excel(writer, index=False, sheet_name='Danh_Sach_Khach')
+                        
+                        # --- BẮT ĐẦU PHẦN ĐỊNH DẠNG ---
+                        workbook = writer.book
+                        worksheet = writer.sheets['Danh_Sach_Khach']
+                        
+                        # Định dạng font và màu sắc cho Tiêu đề (Dòng 1)
+                        header_fill = PatternFill(start_color="0070C0", end_color="0070C0", fill_type="solid")
+                        header_font = Font(color="FFFFFF", bold=True, size=12)
+                        alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                        border = Border(left=Side(style='thin'), right=Side(style='thin'), 
+                                        top=Side(style='thin'), bottom=Side(style='thin'))
+
+                        for col_num, column_title in enumerate(df.columns, 1):
+                            cell = worksheet.cell(row=1, column=col_num)
+                            cell.fill = header_fill
+                            cell.font = header_font
+                            cell.alignment = alignment
+                            cell.border = border
+
+                        # Tự động chỉnh độ rộng cột và kẻ bảng cho dữ liệu
+                        for i, col in enumerate(df.columns):
+                            # Tính độ dài lớn nhất trong cột để chỉnh chiều rộng
+                            column_len = df[col].astype(str).str.len().max()
+                            column_len = max(column_len, len(col)) + 4
+                            worksheet.column_dimensions[get_column_letter(i+1)].width = column_len
+                            
+                            # Kẻ bảng cho từng ô dữ liệu
+                            for row_num in range(2, len(df) + 2):
+                                data_cell = worksheet.cell(row=row_num, column=i+1)
+                                data_cell.border = border
+                                data_cell.alignment = Alignment(horizontal="center")
+
                     excel_data = buffer.getvalue()
                 
-                # 3. CHIÊU THỨC CHO MOBILE: Tạo link tải giả lập
+                    # 3. Tạo link tải cho Mobile
                     b64 = base64.b64encode(excel_data).decode()
-                    href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="{file_name}" style="text-decoration: none;"><button style="width: 100%; background-color: #28a745; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer;">📥 BẤM VÀO ĐÂY ĐỂ TẢI VỀ ĐIỆN THOẠI</button></a>'
-                
-                # Hiển thị nút tải kiểu HTML (Mobile cực thích cái này)
+                    href = f'''
+                    <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="{file_name}" style="text-decoration: none;">
+                        <button style="width: 100%; background-color: #28a745; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer;">
+                            📥 BẤM VÀO ĐÂY ĐỂ TẢI VỀ ĐIỆN THOẠI
+                        </button>
+                    </a>
+                    '''
                     st.markdown(href, unsafe_allow_html=True)
-                    st.info("👆 Nếu bấm nút trên mà không thấy gì, hãy chọn 'Mở bằng trình duyệt' (Chrome/Safari) từ dấu 3 chấm của Zalo nhé!")
+                    st.success(f"Đã sẵn sàng file: {file_name}")
 
             with col2:
                 # NÚT RESET DỮ LIỆU NGÀY MỚI
