@@ -62,16 +62,13 @@ if "action" in params and params["action"] == "checkout":
 # --- GIAO DIỆN CHÍNH ---
 st.sidebar.title("🔑 QUẢN TRỊ")
 user_role = st.sidebar.selectbox("Bạn là ai?", ["Khách hàng", "Bảo vệ / Admin"])
-
 if user_role == "Khách hàng":
     st.title("📝 ĐĂNG KÝ VÀO CƠ QUAN")
     # Chèn Logo trường vào đây nếu em muốn
     # st.image("link_logo.png", width=120) 
-    
     name = st.text_input("Họ và tên")
     phone = st.text_input("Số điện thoại")
     bo_phan = st.selectbox("Bộ phận cần gặp", ["Ban giám hiệu", "Hành chính", "GVCN", "Khác"])
-    
     muc_dich = ""
     if bo_phan == "Hành chính":
         muc_dich = st.text_area("🎯 Mục đích công việc (Bắt buộc):")
@@ -102,8 +99,6 @@ if user_role == "Khách hàng":
                 st.image(buf.getvalue(), caption="Quét mã này khi ra về", width=300)
         else:
             st.error("Vui lòng nhập đủ tên và SĐT!")
-
-
 # --- PHẦN DÀNH CHO BẢO VỆ / ADMIN ---
 else:
     st.title("🛡️ KHU VỰC QUẢN TRỊ")
@@ -133,10 +128,7 @@ else:
             # --- CÔNG CỤ XUẤT FILE & RESET ---
             st.divider()
             st.subheader("⚙️ CÔNG CỤ HỆ THỐNG")
-            
             col1, col2 = st.columns(2)
-            
-    
             with col1:
                 if st.button("📊 Chuẩn bị file Excel"):
                     from datetime import datetime, timedelta
